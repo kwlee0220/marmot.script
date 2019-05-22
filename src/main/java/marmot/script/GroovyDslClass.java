@@ -14,24 +14,23 @@ public class GroovyDslClass extends GroovyObjectSupport {
 		return (String)Array.get(args, index);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T> T getArgs(Object args, int index) {
 		return (T)Array.get(args, index);
 	}
 	
 	@Override
 	public Object getProperty(String name) {
-		System.out.printf("!!!!!!! %s: missing property: name=%s%n",
-							getClass().getSimpleName(), name);
-		System.out.flush();
-		throw new IllegalArgumentException();
+		String msg = String.format("%s: missing property: name=%s",
+									getClass().getSimpleName(), name);
+		throw new IllegalArgumentException(msg);
 	}
 
 	@Override
-    public void setProperty(String name, Object newValue) {
-		System.out.printf("!!!!!!! %s: unknown property: name=%s, value=%s%n",
-						getClass().getSimpleName(), name, newValue);
-		System.out.flush();
-		throw new IllegalArgumentException();
+    public void setProperty(String name, Object value) {
+		String msg = String.format("%s: missing property: name=%s, value=%s",
+									getClass().getSimpleName(), name, value);
+		throw new IllegalArgumentException(msg);
     }
 	
 	@Override
@@ -39,10 +38,8 @@ public class GroovyDslClass extends GroovyObjectSupport {
 		if ( args.getClass().isArray() ) {
 			args = Arrays.toString((Object[])args);
 		}
-		
-		System.out.printf("!!!!!!! %s: missing method: name=%s, args=%s%n",
-							getClass().getSimpleName(), name, args);
-		System.out.flush();
-		throw new IllegalArgumentException();
+		String msg = String.format("%s: missing method: name=%s, args=%s",
+									getClass().getSimpleName(), name, args);
+		throw new IllegalArgumentException(msg);
 	}
 }

@@ -8,7 +8,8 @@ import utils.Utilities;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class MoveDataSetCommand extends GroovyDslClass implements MarmotScriptCommand {
+public class MoveDataSetCommand extends GroovyDslClass
+								implements MarmotScriptCommand<Void> {
 	private final MarmotRuntime m_marmot;
 	private final String m_dsId;
 	private String m_destDsId;
@@ -34,10 +35,11 @@ public class MoveDataSetCommand extends GroovyDslClass implements MarmotScriptCo
 	}
 
 	@Override
-	public void execute() {
+	public Void execute() {
 		Utilities.checkNotNullArgument(m_destDsId, "destination dataset has not been set");
 		
 		m_marmot.moveDataSet(m_dsId, m_destDsId);
+		return null;
 	}
 	
 	@Override

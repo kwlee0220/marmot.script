@@ -33,10 +33,16 @@ public class MarmotScriptEngine {
 		
 		m_binding = new Binding();
 		m_binding.setProperty("marmot", m_marmot);
+		m_binding.setProperty("MARMOT_VERBOSE", false);
 		
 		try ( InputStream is = MarmotScriptEngine.class.getResourceAsStream(PATH) ) {
 			m_bootUpScript = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
+	}
+	
+	public MarmotScriptEngine setVerbose(boolean flag) {
+		m_binding.setProperty("MARMOT_VERBOSE", flag);
+		return this;
 	}
 	
 	public void evaluate(File script) throws IOException {

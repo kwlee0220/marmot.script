@@ -5,6 +5,7 @@ import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.script.GroovyDslClass;
 import marmot.script.ScriptUtils;
+import utils.StopWatch;
 
 /**
  * 
@@ -12,10 +13,12 @@ import marmot.script.ScriptUtils;
  */
 public class CommandScriptRunner extends GroovyDslClass {
 	private final MarmotRuntime m_marmot;
-	private MarmotScriptCommand m_lastFact = null;
+	private final boolean m_verbose;
+	private MarmotScriptCommand<?> m_lastFact = null;
 	
-	public CommandScriptRunner(MarmotRuntime marmot) {
+	public CommandScriptRunner(MarmotRuntime marmot, boolean verbose) {
 		m_marmot = marmot;
+		m_verbose = verbose;
 	}
 	
 	@Override
@@ -45,10 +48,6 @@ public class CommandScriptRunner extends GroovyDslClass {
 		return setNextFactory(new ClusterDataSetCommand(m_marmot, dsId));
 	}
 	
-	public AppendDataSetCommand append(String into) {
-		return setNextFactory(new AppendDataSetCommand());
-	}
-	
 	public RunPlanCommand run(Plan plan) {
 		return setNextFactory(new RunPlanCommand(m_marmot, plan));
 	}
@@ -71,7 +70,25 @@ public class CommandScriptRunner extends GroovyDslClass {
 	
 	public void runLatest() {
 		if ( m_lastFact != null ) {
-			m_lastFact.execute();
+			if ( m_verbose ) {
+				System.out.printf("starting: %s%n", m_lastFact);
+			}
+			StopWatch watch = StopWatch.start();
+			
+			try {
+				Object ret = m_lastFact.execute();
+				if ( m_verbose ) {
+					System.out.printf("done: output=%s, elapsed=%s%n",
+										ret, watch.getElapsedSecondString());
+				}
+			}
+			catch ( Exception e ) {
+				if ( m_verbose ) {
+					System.out.printf("failed: %s, cause=%s%n", m_lastFact, e);
+				}
+				throw e;
+			}
+			
 			m_lastFact = null;
 		}
 	}

@@ -8,7 +8,7 @@ import marmot.script.GroovyDslClass;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class RunPlanCommand extends GroovyDslClass implements MarmotScriptCommand {
+public class RunPlanCommand extends GroovyDslClass implements MarmotScriptCommand<Void> {
 	private final MarmotRuntime m_marmot;
 	private final Plan m_plan;
 	
@@ -18,8 +18,9 @@ public class RunPlanCommand extends GroovyDslClass implements MarmotScriptComman
 	}
 
 	@Override
-	public void execute() {
+	public Void execute() {
 		m_marmot.execute(m_plan);
+		return null;
 	}
 	
 	@Override

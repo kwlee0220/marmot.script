@@ -15,7 +15,8 @@ import marmot.script.ScriptUtils;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class ImportShapefileCommand extends GroovyDslClass implements MarmotScriptCommand {
+public class ImportShapefileCommand extends GroovyDslClass
+									implements MarmotScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_shpPath;
 	private ShapefileParameters m_params = ShapefileParameters.create();
@@ -79,9 +80,9 @@ public class ImportShapefileCommand extends GroovyDslClass implements MarmotScri
 	}
 
 	@Override
-	public void execute() {
-		ImportShapefile.from(new File(m_shpPath), m_params, m_importParams)
-						.run(m_marmot);
+	public Long execute() {
+		return ImportShapefile.from(new File(m_shpPath), m_params, m_importParams)
+								.run(m_marmot);
 	}
 	
 	@Override

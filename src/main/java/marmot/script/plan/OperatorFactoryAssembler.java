@@ -18,6 +18,7 @@ import marmot.script.plan.operator.AssignSquareGridFactory;
 import marmot.script.plan.operator.AssignUidFactory;
 import marmot.script.plan.operator.BufferFactory;
 import marmot.script.plan.operator.CentroidFactory;
+import marmot.script.plan.operator.SpatialClipJoinFactory;
 import marmot.script.plan.operator.DefineColumnFactory;
 import marmot.script.plan.operator.DistinctFactory;
 import marmot.script.plan.operator.ExpandFactory;
@@ -182,20 +183,12 @@ public class OperatorFactoryAssembler extends DslTagParser {
 		return new LoadHashJoinFactory(decl);
 	}
 	
-	public BufferFactory buffer(Column geomCol) {
-		return setNextFactory(new BufferFactory(geomCol.getName()));
-	}
-	
 	public BufferFactory buffer(String geomCol) {
 		return setNextFactory(new BufferFactory(geomCol));
 	}
 	
 	public CentroidFactory centroid(String geomCol) {
 		return setNextFactory(new CentroidFactory(geomCol));
-	}
-	
-	public CentroidFactory centroid(Column geomCol) {
-		return centroid(geomCol.getName());
 	}
 	
 	public ToXyCoordinatesFactory toXY(String geomCol) {
@@ -243,6 +236,10 @@ public class OperatorFactoryAssembler extends DslTagParser {
 	
 	public SpatialOuterJoinFactory spatialOuterJoin(String paramDsId) {
 		return setNextFactory(new SpatialOuterJoinFactory(paramDsId));
+	}
+	
+	public SpatialClipJoinFactory spatialClipJoin(String paramDsId) {
+		return setNextFactory(new SpatialClipJoinFactory(paramDsId));
 	}
 	
 	public LoadSquareGridFactory load(SquareGrid grid) {

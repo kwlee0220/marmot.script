@@ -15,7 +15,8 @@ import marmot.script.ScriptUtils;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class ImportExcelFileCommand extends GroovyDslClass implements MarmotScriptCommand {
+public class ImportExcelFileCommand extends GroovyDslClass
+									implements MarmotScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_path;
 	private ExcelParameters m_excelParams = new ExcelParameters();
@@ -99,9 +100,9 @@ public class ImportExcelFileCommand extends GroovyDslClass implements MarmotScri
 	}
 
 	@Override
-	public void execute() {
-		ImportExcel.from(new File(m_path), m_excelParams, m_importParams)
-					.run(m_marmot);
+	public Long execute() {
+		return ImportExcel.from(new File(m_path), m_excelParams, m_importParams)
+							.run(m_marmot);
 	}
 	
 	@Override

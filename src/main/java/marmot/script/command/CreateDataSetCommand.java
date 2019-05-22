@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import groovy.lang.Closure;
+import marmot.DataSet;
 import marmot.DataSetOption;
 import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
@@ -17,7 +18,8 @@ import marmot.script.dslobj.RecordSchemaParser;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class CreateDataSetCommand extends GroovyDslClass implements MarmotScriptCommand {
+public class CreateDataSetCommand extends GroovyDslClass
+									implements MarmotScriptCommand<DataSet> {
 	private final MarmotRuntime m_marmot;
 	private final String m_dsId;
 	private final List<DataSetOption> m_options = new ArrayList<>();
@@ -91,13 +93,13 @@ public class CreateDataSetCommand extends GroovyDslClass implements MarmotScript
 	}
 
 	@Override
-	public void execute() {
+	public DataSet execute() {
 		DataSetOption[] opts = m_options.toArray(new DataSetOption[0]);
 		if ( m_plan != null ) {
-			m_marmot.createDataSet(m_dsId, m_plan, opts);
+			return m_marmot.createDataSet(m_dsId, m_plan, opts);
 		}
 		else if ( m_schema != null) {
-			m_marmot.createDataSet(m_dsId, m_schema, opts);
+			return m_marmot.createDataSet(m_dsId, m_schema, opts);
 		}
 		else {
 			throw new IllegalStateException("cannot run " + this);

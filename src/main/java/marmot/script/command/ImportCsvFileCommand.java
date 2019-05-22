@@ -14,7 +14,7 @@ import marmot.script.dslobj.CsvOptionsParser;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class ImportCsvFileCommand extends CsvOptionsParser implements MarmotScriptCommand {
+public class ImportCsvFileCommand extends CsvOptionsParser implements MarmotScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_csvPath;
 	private ImportParameters m_importParams = new ImportParameters();
@@ -72,8 +72,8 @@ public class ImportCsvFileCommand extends CsvOptionsParser implements MarmotScri
 	}
 
 	@Override
-	public void execute() {
-		ImportCsv.from(new File(m_csvPath), m_options, m_importParams)
+	public Long execute() {
+		return ImportCsv.from(new File(m_csvPath), m_options, m_importParams)
 						.run(m_marmot);
 	}
 	

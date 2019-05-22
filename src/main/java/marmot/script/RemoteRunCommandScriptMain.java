@@ -11,6 +11,7 @@ import marmot.remote.protobuf.PBMarmotClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Mixin;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
@@ -24,9 +25,13 @@ public class RemoteRunCommandScriptMain implements CheckedConsumer<MarmotRuntime
 	@Parameters(paramLabel="path", index="0", arity="1..1",
 				description="plan file path to run")
 	private String m_scriptFile;
+	
+	@Option(names={"-v"}, paramLabel="verbose", description={"display command progress"})
+	private boolean m_verbose;
 
 	public static final void main(String... args) throws Exception {
-		MarmotClientCommands.configureLog4j();
+//		MarmotClientCommands.configureLog4j();
+		MarmotClientCommands.disableLog4j();
 		
 		RemoteRunCommandScriptMain cmd = new RemoteRunCommandScriptMain();
 		CommandLine commandLine = new CommandLine(cmd);
@@ -52,6 +57,7 @@ public class RemoteRunCommandScriptMain implements CheckedConsumer<MarmotRuntime
 	@Override
 	public void accept(MarmotRuntime marmot) throws Exception {
 		MarmotScriptEngine scriptEngine = new MarmotScriptEngine(marmot);
+		scriptEngine.setVerbose(m_verbose);
 		
 		if ( m_scriptFile != null ) {
 			scriptEngine.evaluate(new File(m_scriptFile));

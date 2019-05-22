@@ -1,7 +1,10 @@
 package marmot.script.command
 
+import marmot.*;
+
+
 def methodMissing(String name, args) {
-	CommandScriptRunner parser = new CommandScriptRunner(marmot);
+	CommandScriptRunner parser = new CommandScriptRunner(marmot, MARMOT_VERBOSE);
 	Closure script = (Closure)args[0]
 	script.delegate = parser
 	script.resolveStrategy = Closure.DELEGATE_ONLY;

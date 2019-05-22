@@ -1,4 +1,4 @@
-
+/*
 load dataset("POI/노인복지시설")
 load "POI/노인복지시설" splitCount 10
 
@@ -79,11 +79,14 @@ load hashJoinFile {
 	workerCount 17
 }
 
-buffer column('the_geom') by '1km'
-buffer 'the_geom' by '100m' output 'the_geom2' segments 16
-centroid column('the_geom')
+buffer 'the_geom' distance '1km'
+buffer 'the_geom' distance 1000 output 'the_geom2' segmentCount 16
+
+centroid 'the_geom'
+centroid 'the_geom' output 'the_geom2'
 transformCrs 'the_geom' from 'EPSG:5186' to 'EPSG:4326'
-toXY column('the_geom') to 'x_pos', 'y_pos' ignore geometry
+
+toXY 'the_geom' to 'x_pos', 'y_pos' ignore geometry
 toXY 'the_geom' x_col 'x_pos' y_col 'y_pos' keep geometry
 toPoint 'the_geom' from 'x_pos', 'y_pos'
 
@@ -108,7 +111,11 @@ spatialSemiJoin "tmp/10min/high_density_center" options {
 }
 
 spatialOuterJoin "tmp/10min/high_density_center" output "*,param.col1"
+*/
 
+spatialClipJoin "tmp/10min/high_density_hdong"
+
+/*
 load squareGrid(bounds: envelope(minx: 10, miny: 20, maxx: 30, maxy:40), cellSize: '10x20')
 load squareGrid(bounds: dataset('xxx'), cellSize: '10x20') splitCount 7
 
@@ -121,3 +128,4 @@ storeAsCsv 'tmp/csv' options {
 	charset 'utf-8'
 }
 storeAsCsv 'tmp/csv'
+*/
