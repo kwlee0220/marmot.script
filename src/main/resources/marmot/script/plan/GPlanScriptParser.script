@@ -1,0 +1,16 @@
+package marmot.script.plan
+
+
+def methodMissing(String name, args) {
+	if ( name != 'plan') {
+		println "!!!!!!! methodMissing(GPlanScriptParser): name=$name, args=$args"
+		return;
+	}
+	
+	OperatorFactoryAssembler assembler = new OperatorFactoryAssembler(args[0]);
+	Closure script = (Closure)args[1]
+	script.delegate = assembler
+	script.resolveStrategy = Closure.DELEGATE_ONLY;
+	script()
+	assembler.assemble();
+}

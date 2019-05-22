@@ -1,0 +1,93 @@
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+group = 'etri'
+version = '5.12.02'
+
+sourceCompatibility = JavaVersion.VERSION_1_8;
+[compileJava,compileTestJava]*.options*.encoding = 'UTF-8'
+
+buildscript {
+	repositories {
+		mavenLocal()
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+	}
+}
+
+repositories {
+    mavenLocal()
+	maven {
+		url "http://www.datanucleus.org/downloads/maven2/"
+	}
+	maven {
+		url "http://download.osgeo.org/webdav/geotools/"
+	}
+	maven {
+		url "http://repo.boundlessgeo.com/main/"
+	}
+    mavenCentral()
+}
+
+ext.groovy_version = '2.4.11'
+
+dependencies {
+	compile project(':marmot.client')
+	compile "org.codehaus.groovy:groovy:${groovy_version}"
+}
+
+shadowJar {
+	classifier 'all'
+	
+	mergeServiceFiles()
+	
+	exclude 'META-INF/*.SF'
+	exclude 'META-INF/*.DSA'
+	exclude 'META-INF/*.RSA'
+}
+
+
+task sourceJar(type: Jar) {
+	classifier 'sources'
+	from sourceSets.main.allSource
+}
+
+javadoc {
+	options.charSet = 'UTF-8'
+}
+task javadocJar(type: Jar) {
+	classifier 'javadoc'
+	from javadoc.destinationDir
+}
+
+artifacts {
+	archives sourceJar
+	archives javadocJar
+	archives shadowJar
+}
+
+apply plugin: 'maven-publish'
+publishing {
+	publications {
+		main(MavenPublication) {
+			artifact jar
+			artifact sourceJar
+			artifact javadocJar
+			artifact shadowJar
+		}
+	}
+}
+
+apply plugin: 'eclipse'
+eclipse {
+	classpath {
+		file {
+			withXml {
+				def node = it.asNode()
+				node.appendNode('classpathentry', [kind: 'output', path: 'classes'])
+			}
+		}
+	}
+}

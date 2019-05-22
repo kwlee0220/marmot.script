@@ -1,0 +1,4 @@
+#!  /bin/bash
+
+java -cp $MARMOT_SCRIPT_HOME/bin/marmot.script.jar	\
+marmot.script.RemoteRunCommandScriptMain "$@"

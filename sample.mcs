@@ -1,0 +1,41 @@
+
+createDataset 'tmp/result' options {
+	geometry 'the_geom(EPSG:5186)'
+	force = true
+	from plan('create_plan') {
+		load '교통/지하철/서울역사'
+		filter 'trnsit_yn==1'
+	}
+}
+cluster_dataset '교통/지하철/서울역사'
+
+deleteDataset 'tmp/result'
+deleteDataset 'tmp/result2'
+
+createDataset 'tmp/result2' options {
+	from plan('create_plan') {
+		load '교통/지하철/서울역사
+		filter 'trnsit_yn==1'
+		project 'KOR_SUB_NM'
+	}
+}
+moveDataset 'tmp/result2' to 'tmp/result'
+
+createDataset 'tmp/result' options {
+	geometry 'the_geom(EPSG:5186)'
+	schema {
+		the_geom multi_polygon
+		age int; trasit boolean
+	}
+	force = true
+}
+
+createDataset 'tmp/result' options {
+	geometry 'the_geom(EPSG:5186)'
+	force = true
+	from plan('create_plan') {
+		load_text '교통/지하철/서울역사'
+		filter 'trnsit_yn==1'
+		project 'KOR_SUB_NM'
+	}
+}
