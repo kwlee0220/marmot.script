@@ -2,8 +2,10 @@ package marmot.script;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Map;
 
 import groovy.lang.GroovyObjectSupport;
+import utils.func.FOption;
 
 /**
  * 
@@ -41,5 +43,21 @@ public class GroovyDslClass extends GroovyObjectSupport {
 		String msg = String.format("%s: missing method: name=%s, args=%s",
 									getClass().getSimpleName(), name, args);
 		throw new IllegalArgumentException(msg);
+	}
+	
+	protected <T> T getOrThrow(Map<String,Object> args, String name) {
+		return ScriptUtils.getOrThrow(args, name);
+	}
+	
+	protected <T> FOption<T> getOption(Map<String,Object> args, String name) {
+		return ScriptUtils.getOption(args, name);
+	}
+	
+	protected FOption<String> getString(Map<String,Object> args, String name) {
+		return ScriptUtils.getOption(args, name);
+	}
+	
+	protected FOption<Integer> getInt(Map<String,Object> args, String name) {
+		return ScriptUtils.getOption(args, name);
 	}
 }

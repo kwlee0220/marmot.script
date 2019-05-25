@@ -9,19 +9,15 @@ import utils.Utilities;
  * @author Kang-Woo Lee (ETRI)
  */
 public class MoveDataSetCommand extends GroovyDslClass
-								implements MarmotScriptCommand<Void> {
+								implements ScriptCommand<Void> {
 	private final MarmotRuntime m_marmot;
-	private final String m_dsId;
+	private final String m_srcDsId;
 	private String m_destDsId;
 	
-	public MoveDataSetCommand(MarmotRuntime marmot, String dsId) {
+	public MoveDataSetCommand(MarmotRuntime marmot, String srcDsId, String dstDsId) {
 		m_marmot = marmot;
-		m_dsId = dsId;
-	}
-	
-	public MoveDataSetCommand to(String destDsId) {
-		m_destDsId = destDsId;
-		return this;
+		m_srcDsId = srcDsId;
+		m_destDsId = dstDsId;
 	}
 	
 	@Override
@@ -38,13 +34,13 @@ public class MoveDataSetCommand extends GroovyDslClass
 	public Void execute() {
 		Utilities.checkNotNullArgument(m_destDsId, "destination dataset has not been set");
 		
-		m_marmot.moveDataSet(m_dsId, m_destDsId);
+		m_marmot.moveDataSet(m_srcDsId, m_destDsId);
 		return null;
 	}
 	
 	@Override
 	public String toString() {
 		return String.format("move dataset '%s' to '%s'",
-							m_dsId, m_destDsId != null ? m_destDsId : "unknown");
+							m_srcDsId, m_destDsId != null ? m_destDsId : "unknown");
 	}
 }

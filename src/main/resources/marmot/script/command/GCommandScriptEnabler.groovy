@@ -1,5 +1,7 @@
 package marmot.script.command
 
+import marmot.script.CommandScriptRunner
+
 def methodMissing(String name, args) {
 	CommandScriptRunner parser = new CommandScriptRunner(null);
 	Closure script = (Closure)args[0]

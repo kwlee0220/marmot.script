@@ -1,29 +1,26 @@
-package marmot.script.plan.operator;
+package marmot.script.dslobj;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import groovy.lang.Closure;
 import marmot.optor.AggregateFunction;
-import marmot.proto.optor.GroupByKeyProto;
-import marmot.proto.optor.OperatorProto;
-import marmot.proto.optor.ReducerProto;
-import marmot.proto.optor.TransformByGroupProto;
-import marmot.proto.optor.ValueAggregateReducersProto;
 import marmot.script.GroovyDslClass;
 import marmot.script.ScriptUtils;
-import utils.stream.FStream;
 
 /**
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class AggregateFactory extends GroovyDslClass implements OperatorFactory {
+public class AggregateFunctionListParser extends GroovyDslClass {
 	private List<AggregateFunction> m_aggrList = new ArrayList<>();
-	private GroupByKeyProto m_group;
 	
-	public AggregateFactory(Closure aggrsDecl) {
+	public AggregateFunctionListParser() {
+	}
+	
+	public List<AggregateFunction> parse(Closure aggrsDecl) {
 		ScriptUtils.callClosure(aggrsDecl, this);
+		return m_aggrList;
 	}
 	
 	@Override
@@ -36,35 +33,6 @@ public class AggregateFactory extends GroovyDslClass implements OperatorFactory 
 		}
 		
 		super.setProperty(name, value);
-	}
-	
-	public AggregateFactory group(Object grpObj) {
-		m_group = ScriptUtils.parseGroup(grpObj);
-		return this;
-	}
-
-	@Override
-	public OperatorProto create() {
-		ValueAggregateReducersProto varp = FStream.from(m_aggrList)
-												.map(AggregateFunction::toProto)
-												.foldLeft(ValueAggregateReducersProto.newBuilder(),
-															(b,f) -> b.addAggregate(f))
-												.build();
-		ReducerProto reducer = ReducerProto.newBuilder()
-											.setValAggregates(varp)
-											.build();
-		if ( m_group == null ) {
-			return OperatorProto.newBuilder().setReduce(reducer).build();
-		}
-		else {
-			TransformByGroupProto transform = TransformByGroupProto.newBuilder()
-																.setGrouper(m_group)
-																.setTransform(reducer)
-																.build();
-			return OperatorProto.newBuilder()
-								.setTransformByGroup(transform)
-								.build();
-		}
 	}
 	
 	public AggregateFunction count() {

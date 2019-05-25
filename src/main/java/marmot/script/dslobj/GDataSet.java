@@ -1,14 +1,15 @@
 package marmot.script.dslobj;
 
+import groovy.lang.GroovyObjectSupport;
 
 /**
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class DataSet {
-	private String m_dsId;
+public class GDataSet extends GroovyObjectSupport {
+	private final String m_dsId;
 	
-	public DataSet(String dsId) {
+	public GDataSet(String dsId) {
 		m_dsId = dsId;
 	}
 	

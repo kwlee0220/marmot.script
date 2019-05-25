@@ -34,7 +34,7 @@ public class JdbcConnectionParser extends GroovyDslClass {
 		return this;
 	}
 	
-	public JdbcConnectionParser password(String passwd) {
+	public JdbcConnectionParser passwd(String passwd) {
 		m_options.passwd(passwd);
 		return this;
 	}

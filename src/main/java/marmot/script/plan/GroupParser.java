@@ -2,8 +2,10 @@ package marmot.script.plan;
 
 import java.util.Map;
 
+import marmot.plan.Group;
 import marmot.proto.optor.GroupByKeyProto;
 import marmot.script.GroovyDslClass;
+import marmot.script.ScriptUtils;
 import utils.func.FOption;
 
 /**
@@ -25,15 +27,25 @@ public class GroupParser extends GroovyDslClass {
 		return builder.build();
 	}
 	
-	public static GroupByKeyProto parse(Map<String,Object> info) {
-		GroupParser parser = new GroupParser();
-
-		info.computeIfPresent("keys", (k,v) -> parser.keys((String)v));
-		info.computeIfPresent("tags", (k,v) -> parser.tags((String)v));
-		info.computeIfPresent("orderBy", (k,v) -> parser.orderBy((String)v));
-		info.computeIfPresent("workerCount", (k,v) -> parser.workerCount((Integer)v));
+	public static Group parse(String keys, Map<String,Object> args) {
+		Group group = Group.keyColumns(keys);
 		
-		return parser.parse();
+		ScriptUtils.getStringOption(args, "tags").ifPresent(group::tagColumns);
+		ScriptUtils.getStringOption(args, "orderBy").ifPresent(group::orderByColumns);
+		ScriptUtils.getIntOption(args, "workerCount").ifPresent(group::workerCount);
+		
+		return group;
+	}
+	
+	public static Group parse(Map<String,Object> args) {
+		String keys = ScriptUtils.getOrThrow(args, "keys");
+		Group group = Group.keyColumns(keys);
+		
+		ScriptUtils.getStringOption(args, "tags").ifPresent(group::tagColumns);
+		ScriptUtils.getStringOption(args, "orderBy").ifPresent(group::orderByColumns);
+		ScriptUtils.getIntOption(args, "workerCount").ifPresent(group::workerCount);
+		
+		return group;
 	}
 	
 	public GroupParser keys(String keyCols) {

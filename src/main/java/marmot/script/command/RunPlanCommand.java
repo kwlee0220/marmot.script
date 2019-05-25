@@ -8,7 +8,7 @@ import marmot.script.GroovyDslClass;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class RunPlanCommand extends GroovyDslClass implements MarmotScriptCommand<Void> {
+public class RunPlanCommand extends GroovyDslClass implements ScriptCommand<Void> {
 	private final MarmotRuntime m_marmot;
 	private final Plan m_plan;
 	

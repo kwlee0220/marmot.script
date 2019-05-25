@@ -1,15 +1,14 @@
 package marmot.script.command;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 import groovy.lang.Closure;
 import marmot.DataSet;
-import marmot.DataSetOption;
 import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordSchema;
+import marmot.StoreDataSetOptions;
 import marmot.script.GroovyDslClass;
 import marmot.script.ScriptUtils;
 import marmot.script.dslobj.RecordSchemaParser;
@@ -19,23 +18,31 @@ import marmot.script.dslobj.RecordSchemaParser;
  * @author Kang-Woo Lee (ETRI)
  */
 public class CreateDataSetCommand extends GroovyDslClass
-									implements MarmotScriptCommand<DataSet> {
+									implements ScriptCommand<DataSet> {
 	private final MarmotRuntime m_marmot;
 	private final String m_dsId;
-	private final List<DataSetOption> m_options = new ArrayList<>();
+	private final StoreDataSetOptions m_options;
 	private RecordSchema m_schema;
 	private Plan m_plan;
 	
-	public CreateDataSetCommand(MarmotRuntime marmot, String dsId) {
+	public CreateDataSetCommand(MarmotRuntime marmot, String dsId, Map<String,Object> args) {
 		m_marmot = marmot;
 		m_dsId = dsId;
+		
+		ScriptUtils.getOption(args, "from")
+					.cast(Plan.class)
+					.ifPresent(p -> m_plan = p);
+		ScriptUtils.getOption(args, "schema")
+					.cast(RecordSchema.class)
+					.ifPresent(s -> m_schema = s);
+		m_options = ScriptUtils.parseStoreDataSetOptions(args);
 	}
 	
 	@Override
 	public Object getProperty(String name) {
 		switch ( name ) {
 			case "force":
-				m_options.add(DataSetOption.FORCE);
+				m_options.force(true);
 				return this;
 			case "plan":
 			case "multi_polygon":
@@ -50,7 +57,7 @@ public class CreateDataSetCommand extends GroovyDslClass
 		switch ( name ) {
 			case "force":
 				if ( (boolean)value ) {
-					m_options.add(DataSetOption.FORCE);
+					m_options.force(true);
 				}
 				return;
 		}
@@ -60,7 +67,7 @@ public class CreateDataSetCommand extends GroovyDslClass
 	
 	public CreateDataSetCommand geometry(String str) {
 		GeometryColumnInfo gcInfo = GeometryColumnInfo.fromString(str);
-		m_options.add(DataSetOption.GEOMETRY(gcInfo));
+		m_options.geometryColumnInfo(gcInfo);
 		
 		return this;
 	}
@@ -94,12 +101,11 @@ public class CreateDataSetCommand extends GroovyDslClass
 
 	@Override
 	public DataSet execute() {
-		DataSetOption[] opts = m_options.toArray(new DataSetOption[0]);
 		if ( m_plan != null ) {
-			return m_marmot.createDataSet(m_dsId, m_plan, opts);
+			return m_marmot.createDataSet(m_dsId, m_plan, m_options);
 		}
 		else if ( m_schema != null) {
-			return m_marmot.createDataSet(m_dsId, m_schema, opts);
+			return m_marmot.createDataSet(m_dsId, m_schema, m_options);
 		}
 		else {
 			throw new IllegalStateException("cannot run " + this);
@@ -108,19 +114,19 @@ public class CreateDataSetCommand extends GroovyDslClass
 	
 	@Override
 	public String toString() {
-		String gcInfoStr = DataSetOption.getGeometryColumnInfo(m_options)
-										.map(gcInfo -> String.format("[%s]", gcInfo))
-										.getOrElse("");
+		String gcInfoStr = m_options.geometryColumnInfo()
+									.map(gcInfo -> String.format("[%s]", gcInfo))
+									.getOrElse("");
 		if ( m_plan != null ) {
-			return String.format("create dataset %s%s from plan(%s)",
+			return String.format("createDataset %s%s from plan(%s)",
 								m_dsId, gcInfoStr, m_plan.getName());
 		}
 		else if ( m_schema != null) {
-			return String.format("create dataset %s%s, schema: %s",
+			return String.format("createDataset %s%s, schema: %s",
 									m_dsId, gcInfoStr, m_schema);
 		}
 		else {
-			return String.format("create dataset %s%s, undefined",
+			return String.format("createDataset %s%s, undefined",
 								m_dsId, gcInfoStr);
 		}
 	}

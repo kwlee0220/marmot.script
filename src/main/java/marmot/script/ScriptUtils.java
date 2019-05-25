@@ -2,26 +2,32 @@ package marmot.script;
 
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
 
 import groovy.lang.Closure;
+import marmot.GeometryColumnInfo;
 import marmot.Plan;
-import marmot.RecordSchema;
 import marmot.RecordScript;
-import marmot.geo.GeoClientUtils;
+import marmot.StoreDataSetOptions;
+import marmot.optor.CsvOptions;
+import marmot.optor.ParseCsvOptions;
+import marmot.optor.geo.SpatialRelation;
+import marmot.plan.GeomOpOptions;
+import marmot.plan.Group;
 import marmot.plan.JdbcConnectOptions;
-import marmot.proto.optor.GroupByKeyProto;
-import marmot.script.dslobj.RecordSchemaParser;
+import marmot.plan.LoadOptions;
+import marmot.plan.PredicateOptions;
+import marmot.plan.SpatialJoinOptions;
+import marmot.script.dslobj.OptionsParser;
+import marmot.script.plan.GPlanBuilder;
 import marmot.script.plan.GroupParser;
 import marmot.script.plan.JdbcConnectionParser;
-import marmot.script.plan.OperatorFactoryAssembler;
-import marmot.script.plan.Size2dParser;
 import marmot.support.DataUtils;
 import utils.Size2d;
 import utils.UnitUtils;
 import utils.Utilities;
+import utils.func.FOption;
 
 /**
  * 
@@ -47,10 +53,6 @@ public class ScriptUtils {
 		return new Envelope(minX, maxX, minY, maxY);
 	}
 	
-	public static Geometry parseWkt(String wktStr) throws ParseException {
-		return GeoClientUtils.fromWKT(wktStr);
-	}
-	
 	public static Object callClosure(Closure script, Object delegate) {
 		Utilities.checkNotNullArgument(script, "script closure is null");
 		Utilities.checkNotNullArgument(delegate, "script closure delegate is null");
@@ -63,50 +65,26 @@ public class ScriptUtils {
 	public static Plan parsePlan(String planName, Closure script) {
 		Utilities.checkNotNullArgument(script, "plan script closure is null");
 		
-		OperatorFactoryAssembler assembler = new OperatorFactoryAssembler(planName);
-		callClosure(script, assembler);
-		return assembler.assemble();
+		GPlanBuilder pbldr = new GPlanBuilder(planName);
+		callClosure(script, pbldr);
+		return pbldr.build();
 	}
 	
-	public static RecordSchema parseSchemaScript(Closure script) {
-		RecordSchemaParser parser = new RecordSchemaParser();
-		return (RecordSchema)callClosure(script, parser);
+	public static Size2d parseSize2d(Map<String,Object> args) {
+		double width = parseDistance(getOrThrow(args, "width"));
+		double height = parseDistance(getOrThrow(args, "height"));
+		
+		return new Size2d(width, height);
+	}
+	public static Size2d parseSize2d(String str) {
+		return Size2d.fromString(str);
 	}
 	
-	public static Size2d parseSize2d(Object obj) {
-		if ( obj instanceof String ) {
-			return Size2d.fromString((String)obj);
-		}
-		else if ( obj instanceof Closure ) {
-			Size2dParser parser = new Size2dParser();
-			callClosure(((Closure)obj), parser);
-			return parser.parse();
-		}
-		else if ( obj instanceof Map ) {
-			Map<String,Object> info = (Map<String,Object>)obj;
-			double width = DataUtils.asDouble(info.get("width"));
-			double height = DataUtils.asDouble(info.get("height"));
-			
-			return new Size2d(width, height);
-		}
-		else {
-			throw new IllegalArgumentException("invalid Size2d: " + obj);
-		}
+	public static Group parseGroup(Map<String,Object> args) {
+		return GroupParser.parse(args);
 	}
-	
-	public static GroupByKeyProto parseGroup(Object obj) {
-		if ( obj instanceof Closure ) {
-			GroupParser parser = new GroupParser();
-			callClosure(((Closure)obj), parser);
-			return parser.parse();
-		}
-		else if ( obj instanceof Map ) {
-			Map<String,Object> info = (Map<String,Object>)obj;
-			return GroupParser.parse(info);
-		}
-		else {
-			throw new IllegalArgumentException("invalid Group: " + obj);
-		}
+	public static Group parseGroup(Map<String,Object> args, String keys) {
+		return GroupParser.parse(keys, args);
 	}
 	
 	public static long parseByteLength(Object obj) {
@@ -121,19 +99,17 @@ public class ScriptUtils {
 		}
 	}
 	
-	public static JdbcConnectOptions parseJdbcConnectOptions(Object obj) {
-		if ( obj instanceof Closure ) {
-			JdbcConnectionParser parser = new JdbcConnectionParser();
-			callClosure(((Closure)obj), parser);
-			return parser.parse();
-		}
-		else if ( obj instanceof Map ) {
-			Map<String,Object> info = (Map<String,Object>)obj;
-			return JdbcConnectionParser.parse(info);
-		}
-		else {
-			throw new IllegalArgumentException("invalid byte-length: " + obj);
-		}
+	public static JdbcConnectOptions parseJdbcConnectOptions(Map<String,Object> args) {
+		return JdbcConnectOptions.create()
+								.jdbcUrl(ScriptUtils.getOrThrow(args, "url"))
+								.user(ScriptUtils.getOrThrow(args, "user"))
+								.passwd(ScriptUtils.getOrThrow(args, "passwd"))
+								.driverClassName(ScriptUtils.getOrThrow(args, "driverClass"));
+	}
+	public static JdbcConnectOptions parseJdbcConnectOptions(Closure decl) {
+		JdbcConnectionParser parser = new JdbcConnectionParser();
+		callClosure(decl, parser);
+		return parser.parse();
 	}
 	
 	public static RecordScript parseRecordScript(Map<String,Object> args, String expr) {
@@ -141,12 +117,123 @@ public class ScriptUtils {
 		return RecordScript.of(initializer, expr);
 	}
 	
-	public static Object getOrThrow(Map<String,Object> info, String name) {
-		Object value = info.get(name);
+	public static PredicateOptions parsePredicateOptions(Map<String,Object> args) {
+		PredicateOptions opts = PredicateOptions.create();
+		ScriptUtils.getBooleanOption(args, "negated").ifPresent(opts::negated);
+		
+		return opts;
+	}
+	
+	public static LoadOptions parseLoadOptions(Map<String,Object> args) {
+		LoadOptions opts = LoadOptions.create();
+		getIntOption(args, "splitCount").ifPresent(opts::splitCount);
+		
+		return opts;
+	}
+	
+	public static StoreDataSetOptions parseStoreDataSetOptions(Map<String,Object> args) {
+		StoreDataSetOptions opts = StoreDataSetOptions.create();
+		
+		FOption<Boolean> force = getOption(args, "force");
+		force.ifPresent(opts::force);
+		
+		FOption<Object> gcInfo = getOption(args, "geometry");
+		gcInfo.ifPresent(info -> {
+			if ( info instanceof String ) {
+				opts.geometryColumnInfo(GeometryColumnInfo.fromString((String)info));
+			}
+			else if ( info instanceof GeometryColumnInfo ) {
+				opts.geometryColumnInfo((GeometryColumnInfo)info);
+			}
+			else {
+				throw new IllegalArgumentException("incorrect GeometryColumnInfo: " + info);
+			}
+		});
+		
+		return opts;
+	}
+	
+	public static CsvOptions parseCsvOptions(Map<String,Object> args) {
+		CsvOptions opts = CsvOptions.create();
+		
+		getStringOption(args, "delim").map(s -> s.charAt(0)).ifPresent(opts::delimiter);
+		getStringOption(args, "quote").map(s -> s.charAt(0)).ifPresent(opts::quote);
+		getStringOption(args, "escape").map(s -> s.charAt(0)).ifPresent(opts::escape);
+		getStringOption(args, "charset").ifPresent(opts::charset);
+		
+		return opts;
+	}
+	
+	public static ParseCsvOptions parseParseCsvOptions(Map<String,Object> args) {
+		ParseCsvOptions opts = ParseCsvOptions.create();
+		
+		getStringOption(args, "delim").map(s -> s.charAt(0)).ifPresent(opts::delimiter);
+		getStringOption(args, "quote").map(s -> s.charAt(0)).ifPresent(opts::quote);
+		getStringOption(args, "escape").map(s -> s.charAt(0)).ifPresent(opts::escape);
+		getStringOption(args, "charset").ifPresent(opts::charset);
+		getStringOption(args, "header").ifPresent(opts::header);
+		getBooleanOption(args, "headerFirst").ifPresent(opts::headerFirst);
+		getBooleanOption(args, "trimColumns").ifPresent(opts::trimColumns);
+		getStringOption(args, "nullValue").ifPresent(opts::nullValue);
+		getIntOption(args, "maxColumnLength").ifPresent(opts::maxColumnLength);
+		getBooleanOption(args, "throwParseError").ifPresent(opts::throwParseError);
+		
+		return opts;
+	}
+	
+	public static GeomOpOptions parseGeomOpOptions(Map<String,Object> args) {
+		GeomOpOptions opts = GeomOpOptions.create();
+		
+		getStringOption(args, "output").ifPresent(opts::outputColumn);
+		getBooleanOption(args, "throwOpError").ifPresent(opts::throwOpError);
+		
+		return opts;
+	}
+	
+	public static SpatialJoinOptions parseSpatialJoinOptions(Map<String,Object> args) {
+		SpatialJoinOptions opts = SpatialJoinOptions.create();
+				
+		getOption(args, "joinExpr").cast(SpatialRelation.class).ifPresent(opts::joinExpr);
+		getBooleanOption(args, "negated").ifPresent(opts::negated);
+		getStringOption(args, "output").ifPresent(opts::outputColumns);
+		
+		return opts;
+	}
+	
+	public static <T> T getOrThrow(Map<String,Object> args, String name) {
+		Object value = args.get(name);
 		if ( value == null ) {
 			throw new IllegalArgumentException("property is missing: " + name);
 		}
 		
-		return value;
+		return (T)value;
+	}
+	
+	public static <T> FOption<T> getOption(Map<String,Object> args, String name) {
+		return FOption.ofNullable((T)args.get(name));
+	}
+	public static FOption<Integer> getIntOption(Map<String,Object> args, String name) {
+		return FOption.ofNullable((Integer)args.get(name));
+	}
+	public static FOption<Long> getLongOption(Map<String,Object> args, String name) {
+		return FOption.ofNullable((Long)args.get(name));
+	}
+	public static FOption<String> getStringOption(Map<String,Object> args, String name) {
+		return FOption.ofNullable((String)args.get(name));
+	}
+	public static FOption<Boolean> getBooleanOption(Map<String,Object> args, String name) {
+		return FOption.ofNullable((Boolean)args.get(name));
+	}
+
+	
+	public static Map<String,Object> options(Map<String,Object> args, Closure decl) {
+		OptionsParser parser = new OptionsParser(args);
+		ScriptUtils.callClosure(decl, parser);
+		return parser.getArguments();
+	}
+	public static Map<String,Object> options(Closure decl) {
+		OptionsParser parser = new OptionsParser(Maps.newHashMap());
+		ScriptUtils.callClosure(decl, parser);
+		return parser.getArguments();
 	}
 }

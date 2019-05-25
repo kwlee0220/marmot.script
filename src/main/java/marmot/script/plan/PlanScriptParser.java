@@ -9,10 +9,12 @@ import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 import groovy.lang.GroovyShell;
 import marmot.Plan;
+import marmot.script.MarmotScriptEngine;
 import utils.io.IOUtils;
 
 /**
@@ -24,8 +26,9 @@ public class PlanScriptParser {
 	private final String m_bootUpScript;
 	
 	public PlanScriptParser() throws URISyntaxException, IOException {
-		URI uri = PlanScriptParser.class.getResource(PATH).toURI();
-		m_bootUpScript = IOUtils.toString(new File(uri));
+		try ( InputStream is = MarmotScriptEngine.class.getResourceAsStream(PATH) ) {
+			m_bootUpScript = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
 	}
 	
 	public Plan parse(String name, File dslScript) throws IOException {
@@ -34,20 +37,20 @@ public class PlanScriptParser {
 	
 	public Plan parse(String name, String dslScript) {
 		String script = String.format("%s%n%nplan('%s'){%n%s%n}", m_bootUpScript, name, dslScript);
-		return (Plan)new GroovyShell().evaluate(script);
+		return (Plan)new GroovyShell().evaluate(script, "GPlanScriptParser");
 	}
 	
-	public void parse(InputStream is) throws IOException {
+	public Plan parse(String name, InputStream is) throws IOException {
 		Vector<InputStream> streams = new Vector<>();
 
-		String prefix = String.format("s%n%nplan('%s'){%n", m_bootUpScript);
+		String prefix = String.format("%s%n%nplan('%s'){%n", m_bootUpScript, name);
 		streams.add(new ByteArrayInputStream(prefix.getBytes()));
 		streams.add(is);
 		streams.add(new ByteArrayInputStream("}".getBytes()));
 		
 		try ( InputStream tagged = new SequenceInputStream(streams.elements());
 				Reader reader = new InputStreamReader(tagged) ) {
-			new GroovyShell().evaluate(reader, "GPlanScriptParser");
+			return (Plan)new GroovyShell().evaluate(reader, "GPlanScriptParser");
 		}
 	}
 }

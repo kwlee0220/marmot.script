@@ -4,6 +4,6 @@ package marmot.script.command;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public interface MarmotScriptCommand<T> {
+public interface ScriptCommand<T> {
 	public T execute();
 }

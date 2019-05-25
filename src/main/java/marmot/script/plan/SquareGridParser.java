@@ -4,7 +4,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import marmot.optor.geo.SquareGrid;
 import marmot.script.GroovyDslClass;
-import marmot.script.dslobj.DataSet;
+import marmot.script.dslobj.GDataSet;
 import utils.Size2d;
 
 /**
@@ -22,7 +22,7 @@ public class SquareGridParser extends GroovyDslClass {
 		return this;
 	}
 	
-	public SquareGridParser bounds(DataSet dsRef) {
+	public SquareGridParser bounds(GDataSet dsRef) {
 		m_boundsDsId = dsRef.getId();
 		
 		return this;

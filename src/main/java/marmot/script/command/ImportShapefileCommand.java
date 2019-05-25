@@ -1,8 +1,8 @@
 package marmot.script.command;
 
 import java.io.File;
+import java.util.Map;
 
-import groovy.lang.Closure;
 import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.command.ImportParameters;
@@ -16,67 +16,29 @@ import marmot.script.ScriptUtils;
  * @author Kang-Woo Lee (ETRI)
  */
 public class ImportShapefileCommand extends GroovyDslClass
-									implements MarmotScriptCommand<Long> {
+									implements ScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_shpPath;
 	private ShapefileParameters m_params = ShapefileParameters.create();
 	private ImportParameters m_importParams = new ImportParameters();
 	
-	public ImportShapefileCommand(MarmotRuntime marmot, String shpPath) {
+	public ImportShapefileCommand(MarmotRuntime marmot, String shpPath, String dsId,
+									Map<String,Object> args) {
 		m_marmot = marmot;
 		m_shpPath = shpPath;
-	}
-	
-	@Override
-	public Object getProperty(String name) {
-		switch ( name ) {
-			case "force":
-				m_importParams.setForce(true);
-				return this;
-		}
 		
-		return super.getProperty(name);
-	}
+		ScriptUtils.getStringOption(args, "charset").ifPresent(m_params::charset);
+		ScriptUtils.getStringOption(args, "shpSrid").ifPresent(m_params::shpSrid);
 
-	@Override
-    public void setProperty(String name, Object newValue) {
-		switch ( name ) {
-			case "force":
-				m_importParams.setForce((Boolean)newValue);
-				return;
-		}
-		
-		super.setProperty(name, newValue);
-	}
-	
-	public ImportShapefileCommand to(String dsId) {
 		m_importParams.setDataSetId(dsId);
-		return this;
-	}
-	
-	public ImportShapefileCommand geometry(String str) {
-		m_importParams.setGeometryColumnInfo(GeometryColumnInfo.fromString(str));
-		return this;
-	}
-	
-	public ImportShapefileCommand options(Closure script) {
-		ScriptUtils.callClosure(script, this);
-		return this;
-	}
-	
-	public ImportShapefileCommand srid(String srid) {
-		m_params.shpSrid(srid);
-		return this;
-	}
-	
-	public ImportShapefileCommand charset(String charset) {
-		m_params.charset(charset);
-		return this;
-	}
-	
-	public ImportShapefileCommand force(boolean flag) {
-		m_importParams.setForce(flag);
-		return this;
+		ScriptUtils.getStringOption(args, "geometry").map(GeometryColumnInfo::fromString)
+													.ifPresent(m_importParams::setGeometryColumnInfo);
+		ScriptUtils.getBooleanOption(args, "force").ifPresent(m_importParams::setForce);
+		ScriptUtils.getBooleanOption(args, "append").ifPresent(m_importParams::setAppend);
+		ScriptUtils.getBooleanOption(args, "compression").ifPresent(m_importParams::setCompression);
+		ScriptUtils.getOption(args, "blockSize")
+					.map(ScriptUtils::parseByteLength).ifPresent(m_importParams::setBlockSize);
+		ScriptUtils.getIntOption(args, "reportInterval").ifPresent(m_importParams::setReportInterval);
 	}
 
 	@Override
@@ -87,7 +49,7 @@ public class ImportShapefileCommand extends GroovyDslClass
 	
 	@Override
 	public String toString() {
-		return String.format("import_shapefile '%s' into '%s'",
+		return String.format("importShapefile '%s' into '%s'",
 							m_shpPath, m_importParams.getDataSetId());
 	}
 }

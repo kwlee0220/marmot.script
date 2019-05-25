@@ -14,14 +14,15 @@ import marmot.script.dslobj.CsvOptionsParser;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class ImportCsvFileCommand extends CsvOptionsParser implements MarmotScriptCommand<Long> {
+public class ImportCsvFileCommand extends CsvOptionsParser implements ScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_csvPath;
 	private ImportParameters m_importParams = new ImportParameters();
 	
-	public ImportCsvFileCommand(MarmotRuntime marmot, String path) {
+	public ImportCsvFileCommand(MarmotRuntime marmot, String path, String dsId) {
 		m_marmot = marmot;
 		m_csvPath = path;
+		m_importParams.setDataSetId(dsId);
 	}
 	
 	@Override
@@ -44,11 +45,6 @@ public class ImportCsvFileCommand extends CsvOptionsParser implements MarmotScri
 		}
 		
 		super.setProperty(name, newValue);
-	}
-	
-	public ImportCsvFileCommand to(String dsId) {
-		m_importParams.setDataSetId(dsId);
-		return this;
 	}
 	
 	public ImportCsvFileCommand geometry(String str) {
@@ -79,7 +75,7 @@ public class ImportCsvFileCommand extends CsvOptionsParser implements MarmotScri
 	
 	@Override
 	public String toString() {
-		return String.format("import_shapefile '%s' into '%s'",
-							m_csvPath, m_importParams.getDataSetId());
+		return String.format("import_csv('%s','%s',delim='%s')",
+							m_csvPath, m_importParams.getDataSetId(), m_options.delimiter());
 	}
 }

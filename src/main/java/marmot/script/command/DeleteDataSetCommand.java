@@ -9,7 +9,7 @@ import utils.stream.FStream;
  * @author Kang-Woo Lee (ETRI)
  */
 public class DeleteDataSetCommand extends GroovyDslClass
-									implements MarmotScriptCommand<Void> {
+									implements ScriptCommand<Void> {
 	private final MarmotRuntime m_marmot;
 	private String[] m_dsIds;
 	

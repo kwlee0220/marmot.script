@@ -9,7 +9,7 @@ import marmot.script.GroovyDslClass;
  * @author Kang-Woo Lee (ETRI)
  */
 public class ClusterDataSetCommand extends GroovyDslClass
-									implements MarmotScriptCommand<Void> {
+									implements ScriptCommand<Void> {
 	private final MarmotRuntime m_marmot;
 	private final String m_dsId;
 	
@@ -28,6 +28,6 @@ public class ClusterDataSetCommand extends GroovyDslClass
 	
 	@Override
 	public String toString() {
-		return String.format("cluster_dataset '%s'", m_dsId);
+		return String.format("clusterDataset '%s'", m_dsId);
 	}
 }

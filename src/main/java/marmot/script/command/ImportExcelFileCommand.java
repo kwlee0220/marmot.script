@@ -1,8 +1,8 @@
 package marmot.script.command;
 
 import java.io.File;
+import java.util.Map;
 
-import groovy.lang.Closure;
 import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.command.ImportParameters;
@@ -16,87 +16,31 @@ import marmot.script.ScriptUtils;
  * @author Kang-Woo Lee (ETRI)
  */
 public class ImportExcelFileCommand extends GroovyDslClass
-									implements MarmotScriptCommand<Long> {
+									implements ScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_path;
 	private ExcelParameters m_excelParams = new ExcelParameters();
 	private ImportParameters m_importParams = new ImportParameters();
 	
-	public ImportExcelFileCommand(MarmotRuntime marmot, String path) {
+	public ImportExcelFileCommand(MarmotRuntime marmot, String path, String dsId,
+									Map<String,Object> args) {
 		m_marmot = marmot;
 		m_path = path;
-	}
-	
-	@Override
-	public Object getProperty(String name) {
-		switch ( name ) {
-			case "force":
-				m_importParams.setForce(true);
-				return this;
-			case "headerFirst":
-				return headerFirst(true);
-		}
-		
-		return super.getProperty(name);
-	}
 
-	@Override
-    public void setProperty(String name, Object value) {
-		switch ( name ) {
-			case "force":
-				m_importParams.setForce((Boolean)value);
-				return;
-			case "headerFirst":
-				headerFirst((Boolean)value);
-				break;
-		}
-		
-		super.setProperty(name, value);
-	}
-	
-	public ImportExcelFileCommand to(String dsId) {
+		ScriptUtils.getBooleanOption(args, "headerFirst").ifPresent(m_excelParams::headerFirst);
+		ScriptUtils.getStringOption(args, "nullString").ifPresent(m_excelParams::nullString);
+		ScriptUtils.getStringOption(args, "shpSrid").ifPresent(m_excelParams::srid);
+		ScriptUtils.getStringOption(args, "pointColumns").ifPresent(m_excelParams::pointColumns);
+
 		m_importParams.setDataSetId(dsId);
-		return this;
-	}
-	
-	public ImportExcelFileCommand geometry(String str) {
-		m_importParams.setGeometryColumnInfo(GeometryColumnInfo.fromString(str));
-		return this;
-	}
-	
-	public ImportExcelFileCommand headerFirst(boolean flag) {
-		m_excelParams.headerFirst(flag);
-		return this;
-	}
-	
-	public ImportExcelFileCommand pointColumns(String pointCols) {
-		m_excelParams.pointColumns(pointCols);
-		return this;
-	}
-	
-	public ImportExcelFileCommand srid(String srid) {
-		m_excelParams.srid(srid);
-		return this;
-	}
-	
-	public ImportExcelFileCommand blockSize(Object obj) {
-		m_importParams.setBlockSize(ScriptUtils.parseByteLength(obj));
-		return this;
-	}
-	
-	public ImportExcelFileCommand compression(boolean flag) {
-		m_importParams.setCompression(flag);
-		return this;
-	}
-	
-	public ImportExcelFileCommand force(boolean flag) {
-		m_importParams.setForce(flag);
-		return this;
-	}
-	
-	public ImportExcelFileCommand options(Closure script) {
-		ScriptUtils.callClosure(script, this);
-		return this;
+		ScriptUtils.getStringOption(args, "geometry").map(GeometryColumnInfo::fromString)
+													.ifPresent(m_importParams::setGeometryColumnInfo);
+		ScriptUtils.getBooleanOption(args, "force").ifPresent(m_importParams::setForce);
+		ScriptUtils.getBooleanOption(args, "append").ifPresent(m_importParams::setAppend);
+		ScriptUtils.getBooleanOption(args, "compression").ifPresent(m_importParams::setCompression);
+		ScriptUtils.getOption(args, "blockSize")
+					.map(ScriptUtils::parseByteLength).ifPresent(m_importParams::setBlockSize);
+		ScriptUtils.getIntOption(args, "reportInterval").ifPresent(m_importParams::setReportInterval);
 	}
 
 	@Override
@@ -107,7 +51,7 @@ public class ImportExcelFileCommand extends GroovyDslClass
 	
 	@Override
 	public String toString() {
-		return String.format("import_excelfile '%s' into '%s'",
+		return String.format("importExcelFile '%s' into '%s'",
 							m_path, m_importParams.getDataSetId());
 	}
 }

@@ -8,7 +8,7 @@ import static marmot.optor.AggregateFunction.*;
 
 
 def methodMissing(String name, args) {
-	CommandScriptRunner parser = new CommandScriptRunner(marmot, MARMOT_VERBOSE);
+	CommandScriptParser parser = new CommandScriptParser(marmot, MARMOT_VERBOSE);
 	Closure script = (Closure)args[0]
 	script.delegate = parser
 	script.resolveStrategy = Closure.DELEGATE_ONLY;
