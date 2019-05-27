@@ -73,7 +73,7 @@ public class CreateDataSetCommand extends GroovyDslClass
 	}
 	
 	public Plan plan(String name, Closure script) {
-		return ScriptUtils.parsePlan(name, script);
+		return ScriptUtils.parsePlan(m_marmot, name, script);
 	}
 	
 	public void schema(Closure decl) {

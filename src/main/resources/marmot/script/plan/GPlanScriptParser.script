@@ -7,10 +7,10 @@ def methodMissing(String name, args) {
 		return;
 	}
 	
-	GPlanBuilder builder = new GPlanBuilder(args[0])
+	GPlanBuilder builder = new GPlanBuilder(marmot, args[0])
 	Closure script = (Closure)args[1]
 	script.delegate = builder
-	script.resolveStrategy = Closure.DELEGATE_ONLY;
+	script.resolveStrategy = Closure.DELEGATE_FIRST;
 	script()
 	
 	builder.build();

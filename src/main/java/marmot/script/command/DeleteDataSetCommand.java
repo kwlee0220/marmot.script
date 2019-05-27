@@ -30,6 +30,6 @@ public class DeleteDataSetCommand extends GroovyDslClass
 	@Override
 	public String toString() {
 		String idsStr = FStream.of(m_dsIds).map(id ->  String.format("'%s'", id)).join(",");
-		return String.format("delete dataset '%s'", idsStr);
+		return String.format("DeleteDataSet '%s'", idsStr);
 	}
 }

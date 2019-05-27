@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import groovy.lang.Closure;
 import marmot.GeometryColumnInfo;
+import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordScript;
 import marmot.StoreDataSetOptions;
@@ -58,14 +59,14 @@ public class ScriptUtils {
 		Utilities.checkNotNullArgument(delegate, "script closure delegate is null");
 		
 		script.setDelegate(delegate);
-		script.setResolveStrategy(Closure.DELEGATE_ONLY);
+		script.setResolveStrategy(Closure.DELEGATE_FIRST);
 		return script.call();
 	}
 	
-	public static Plan parsePlan(String planName, Closure script) {
+	public static Plan parsePlan(MarmotRuntime marmot, String planName, Closure script) {
 		Utilities.checkNotNullArgument(script, "plan script closure is null");
 		
-		GPlanBuilder pbldr = new GPlanBuilder(planName);
+		GPlanBuilder pbldr = new GPlanBuilder(marmot, planName);
 		callClosure(script, pbldr);
 		return pbldr.build();
 	}
@@ -80,9 +81,6 @@ public class ScriptUtils {
 		return Size2d.fromString(str);
 	}
 	
-	public static Group parseGroup(Map<String,Object> args) {
-		return GroupParser.parse(args);
-	}
 	public static Group parseGroup(Map<String,Object> args, String keys) {
 		return GroupParser.parse(keys, args);
 	}

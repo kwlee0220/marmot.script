@@ -39,17 +39,18 @@ sample(0.1)
 shard(10)
 
 aggregate({count=count(); total=sum('age'); avg=avg('age')})
-aggregateByGroup(group(keys: 'kcol', tags: 'the_geom', workerCount: 17),
-				{ count=count(); total=sum('age'); avg=avg('age') })
+aggregateByGroup('kcol', tags: 'the_geom', workerCount: 17) {
+	count=count(); total=sum('age'); avg=avg('age')
+}
 				
-takeByGroup(group('kcol', orderBy: 'ocol3:A,ocol4:B'), 10)
-listByGroup(group('col1,col2', tags: 'col3,col4', orderBy: 'col5:DESC,col6:ASC')) 
+takeByGroup('kcol', 10, orderBy: 'ocol3:A,ocol4:B')
+listByGroup('col1,col2', tags: 'col3,col4', orderBy: 'col5:DESC,col6:ASC') 
 
-storeByGroup(group(keys:'col1'), "/tmp/result")
-storeByGroup(group(keys:'col1'), "/tmp/result", force:true)
+storeByGroup('col1', "/tmp/result")
+storeByGroup('col1', "/tmp/result", force:true)
 
 def outSchema = schema("name:string,age:int,value:double")
-reduceColumnsByGroup(group('col1'), outSchema, 'tag', 'value')
+reduceToSingleRecordByGroup('col1', outSchema, 'tag', 'value')
 
 parseCsv('text') {
 	delim '|'
@@ -61,15 +62,14 @@ parseCsv('text') {
 	throwParseError false
 }
 
-hashJoin('col1,col2', 'POI/노인복지시설', 'col1,jcol2', 'left.*')
-hashJoin('col1,col2', 'POI/노인복지시설', 'col1,jcol2', 'left.*', workerCount: 5)
-hashJoin('col1,col2', 'POI/노인복지시설', 'col1,jcol2', '*,param.{C1,C2}',
+hashJoin('col1,col2', 'POI/노인복지시설', 'col1,jcol2', output: 'left.*')
+hashJoin('col1,col2', 'POI/노인복지시설', 'col1,jcol2', output: 'left.*', workerCount: 5)
+hashJoin('col1,col2', 'POI/노인복지시설', 'col1,jcol2', output: '*,param.{C1,C2}',
 			type: 'LEFT_OUTER_JOIN', workerCount: 5)
 
 def rightCols = (2011..2017).collect { "gas_$it" }.join(',')
 loadHashJoinFile('구역/연속지적도', 'PNU', 'tmp/anyang/gas_side_by_side', 'PNU',
-				"left.*,right.{$rightCols}",
-				type: 'LEFT_OUTER_JOIN', workerCount: 17)
+				output: "left.*,right.{$rightCols}", type: 'LEFT_OUTER_JOIN', workerCount: 17)
 
 buffer('the_geom', distance('1km'))
 buffer('the_geom', 1000, output: 'the_geom2', segmentCount: 16, throwOpError:true)
@@ -79,12 +79,15 @@ centroid('the_geom', output: 'the_geom2')
 
 transformCrs('the_geom', 'EPSG:5186', 'EPSG:4326')
 
+intersection('the_geom', wkt('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))'))
+
 toXY 'the_geom', 'x_pos', 'y_pos'
 toXY 'the_geom', 'x_pos', 'y_pos', keepGeomColumn: true
 toPoint 'x_pos', 'y_pos', 'the_geom' 
 
 filterSpatially('the_geom', intersects, wkt('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) 
 filterSpatially('the_geom', withinDistance('4km'), envelope(minx: 0, miny: 0, maxx: 1, maxy:1))
+filterSpatially('the_geom', intersects, dataset('구역/시도').bounds) 
 
 query 'POI/노인복지시설', envelope(minx: 0, miny: 0, maxx: 1, maxy:1) 
 query 'POI/노인복지시설', wkt('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')

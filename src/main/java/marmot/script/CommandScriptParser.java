@@ -5,16 +5,23 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import groovy.lang.Closure;
+import marmot.ExecutePlanOptions;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.script.command.ClusterDataSetCommand;
 import marmot.script.command.CreateDataSetCommand;
 import marmot.script.command.DeleteDataSetCommand;
+import marmot.script.command.ExecuteProcessCommand;
 import marmot.script.command.ImportCsvFileCommand;
 import marmot.script.command.ImportExcelFileCommand;
 import marmot.script.command.ImportShapefileCommand;
 import marmot.script.command.MoveDataSetCommand;
 import marmot.script.command.RunPlanCommand;
+import marmot.script.command.RunPlanToGeometry;
+import marmot.script.command.RunPlanToLong;
+import marmot.script.command.RunPlanToRecord;
+import marmot.script.command.RunPlanToRecordSet;
+import marmot.script.command.RunPlanToString;
 
 
 /**
@@ -79,6 +86,66 @@ public class CommandScriptParser extends GroovyDslClass {
 		return cmd;
 	}
 	
+	public RunPlanToRecordSet runPlanToRecordSet(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToRecordSet cmd = new RunPlanToRecordSet(m_marmot, plan, opts);
+		if ( m_verbose ) {
+			System.out.println(cmd);
+		}
+		return cmd;
+	}
+	public RunPlanToRecordSet runPlanToRecordSet(Plan plan) {
+		return runPlanToRecordSet(Maps.newHashMap(), plan);
+	}
+	
+	public RunPlanToRecord runPlanToRecord(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToRecord cmd = new RunPlanToRecord(m_marmot, plan, opts);
+		if ( m_verbose ) {
+			System.out.println(cmd);
+		}
+		return cmd;
+	}
+	public RunPlanToRecord runPlanToRecord(Plan plan) {
+		return runPlanToRecord(Maps.newHashMap(), plan);
+	}
+	
+	public RunPlanToGeometry runPlanToGeometry(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToGeometry cmd = new RunPlanToGeometry(m_marmot, plan, opts);
+		if ( m_verbose ) {
+			System.out.println(cmd);
+		}
+		return cmd;
+	}
+	public RunPlanToGeometry runPlanToGeometry(Plan plan) {
+		return runPlanToGeometry(Maps.newHashMap(), plan);
+	}
+	
+	public RunPlanToLong runPlanToLong(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToLong cmd = new RunPlanToLong(m_marmot, plan, opts);
+		if ( m_verbose ) {
+			System.out.println(cmd);
+		}
+		return cmd;
+	}
+	public RunPlanToLong runPlanToLong(Plan plan) {
+		return runPlanToLong(Maps.newHashMap(), plan);
+	}
+	
+	public RunPlanToString runPlanToString(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToString cmd = new RunPlanToString(m_marmot, plan, opts);
+		if ( m_verbose ) {
+			System.out.println(cmd);
+		}
+		return cmd;
+	}
+	public RunPlanToString runPlanToString(Plan plan) {
+		return runPlanToString(Maps.newHashMap(), plan);
+	}
+	
 	public ImportShapefileCommand importShapefile(Map<String,Object> args, String shpPath,
 												String dsId) {
 		ImportShapefileCommand cmd = new ImportShapefileCommand(m_marmot, shpPath, dsId, args);
@@ -107,11 +174,25 @@ public class CommandScriptParser extends GroovyDslClass {
 		}
 		return cmd;
 	}
-	public void importExcelFile(String shpPath, String dsId, Closure optDecl) {
-		importExcelFile(ScriptUtils.options(optDecl), shpPath, dsId);
+	public ImportExcelFileCommand importExcelFile(String shpPath, String dsId, Closure optDecl) {
+		return importExcelFile(ScriptUtils.options(optDecl), shpPath, dsId);
+	}
+	
+	public ExecuteProcessCommand executeProcess(Map<String,Object> args, String procName) {
+		return new ExecuteProcessCommand(m_marmot, procName, args);
 	}
 	
 	public Plan plan(String name, Closure script) {
-		return ScriptUtils.parsePlan(name, script);
+		return ScriptUtils.parsePlan(m_marmot, name, script);
+	}
+	
+	private ExecutePlanOptions parseExecutePlanOptions(Map<String,Object> args) {
+		ExecutePlanOptions opts = ExecutePlanOptions.create();
+		ScriptUtils.getBooleanOption(args, "disableLocalExec")
+					.ifPresent(opts::disableLocalExecution);
+		ScriptUtils.getStringOption(args, "mapOutputCompressionCodec")
+					.ifPresent(opts::mapOutputCompressionCodec);
+		
+		return opts;
 	}
 }

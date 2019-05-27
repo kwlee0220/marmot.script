@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 
 import groovy.lang.Closure;
+import marmot.MarmotRuntime;
 import marmot.PlanBuilder;
 import marmot.RecordSchema;
 import marmot.RecordScript;
@@ -40,8 +41,12 @@ import utils.func.FOption;
  * @author Kang-Woo Lee (ETRI)
  */
 public class GPlanBuilder extends PlanBuilder {
-	public GPlanBuilder(String name) {
+	private final MarmotRuntime m_marmot;
+	
+	public GPlanBuilder(MarmotRuntime marmot, String name) {
 		super(name);
+		
+		m_marmot = marmot;
 	}
 	
 	public GPlanBuilder load(Map<String,Object> args, String dsId) {
@@ -97,25 +102,65 @@ public class GPlanBuilder extends PlanBuilder {
 		return this;
 	}
 	
-	public GPlanBuilder aggregateByGroup(Group group, Closure aggrsDecl) {
+	public GPlanBuilder aggregateByGroup(Map<String,Object> args, String keyCols,
+										Closure aggrsDecl) {
+		Group group = ScriptUtils.parseGroup(args, keyCols);
 		List<AggregateFunction> aggrs = new AggregateFunctionListParser().parse(aggrsDecl);
 		super.aggregateByGroup(group, aggrs.toArray(new AggregateFunction[0]));
 		return this;
 	}
+	public GPlanBuilder aggregateByGroup(String keyCols, Closure aggrsDecl) {
+		return aggregateByGroup(Maps.newHashMap(), keyCols, aggrsDecl);
+	}
+
+	public GPlanBuilder aggregateByGroup(Map<String,Object> args, String keyCols,
+										List<AggregateFunction> aggrList) {
+		Group group = ScriptUtils.parseGroup(args, keyCols);
+		super.aggregateByGroup(group, aggrList.toArray(new AggregateFunction[0]));
+		return this;
+	}
+	public GPlanBuilder aggregateByGroup(String keyCols, List<AggregateFunction> aggrList) {
+		return aggregateByGroup(Maps.newHashMap(), keyCols, aggrList);
+	}
 	
-	public GPlanBuilder takeByGroup(Group group, int count) {
+	public GPlanBuilder takeByGroup(Map<String,Object> args, String keyCols, int count) {
+		Group group = ScriptUtils.parseGroup(args, keyCols);
 		super.takeByGroup(group, count);
 		return this;
 	}
+	public GPlanBuilder takeByGroup(String keyCols, int count) {
+		return takeByGroup(Maps.newHashMap(), keyCols, count);
+	}
 	
-	public GPlanBuilder storeByGroup(Map<String,Object> args, Group group, String rootPath) {
+	public GPlanBuilder listByGroup(Map<String,Object> args, String keyCols) {
+		Group group = ScriptUtils.parseGroup(args, keyCols);
+		super.listByGroup(group);
+		return this;
+	}
+	public GPlanBuilder listByGroup(String keyCols) {
+		return listByGroup(Maps.newHashMap(), keyCols);
+	}
+	
+	public GPlanBuilder storeByGroup(Map<String,Object> args, String keyCols, String rootPath) {
+		Group group = ScriptUtils.parseGroup(args, keyCols);
 		StoreDataSetOptions opts = ScriptUtils.parseStoreDataSetOptions(args);
 		super.storeByGroup(group, rootPath, opts);
 		return this;
 	}
-	public GPlanBuilder storeByGroup(Group group, String rootPath) {
-		super.storeByGroup(group, rootPath, StoreDataSetOptions.create());
+	public GPlanBuilder storeByGroup(String keyCols, String rootPath) {
+		return storeByGroup(Maps.newHashMap(), keyCols, rootPath);
+	}
+	
+	public GPlanBuilder reduceToSingleRecordByGroup(Map<String,Object> args, String keyCols,
+													RecordSchema outSchema,
+													String tagCol, String valueCol) {
+		Group group = ScriptUtils.parseGroup(args, keyCols);
+		super.reduceToSingleRecordByGroup(group, outSchema, tagCol, valueCol);
 		return this;
+	}
+	public GPlanBuilder reduceToSingleRecordByGroup(String keyCols, RecordSchema outSchema,
+													String tagCol, String valueCol) {
+		return reduceToSingleRecordByGroup(Maps.newHashMap(), keyCols, outSchema, tagCol, valueCol);
 	}
 
 	public GPlanBuilder parseCsv(Map<String,Object> args, String csvColumn, Closure csvDecls) {
@@ -168,7 +213,7 @@ public class GPlanBuilder extends PlanBuilder {
 	public GPlanBuilder loadHashJoinFile(Map<String,Object> args,
 										String leftDsId, String leftJoinCols,
 										String rightDsId, String rightJoinCols) {
-		String outJoinCols = ScriptUtils.getOrThrow(args, "output");
+		String outJoinCols = ScriptUtils.getOrThrow(args, "output").toString();
 		JoinOptions jopts = ScriptUtils.getOption(args, "type")
 										.map(o -> {
 											if ( o instanceof JoinType ) {
@@ -206,20 +251,23 @@ public class GPlanBuilder extends PlanBuilder {
 		return this;
 	}
 
-	public GPlanBuilder filterSpatially(String geomCol, SpatialRelation rel, Envelope bounds) {
-		filterSpatially(geomCol, rel, GeoClientUtils.toPolygon(bounds));
+	public GPlanBuilder filterSpatially(String geomCol, SpatialRelation rel, Geometry key) {
+		super.filterSpatially(geomCol, rel, key);
 		return this;
 	}
 	public GPlanBuilder filterSpatially(Map<String,Object> args, String geomCol,
-										SpatialRelation rel, Object key) {
+										SpatialRelation rel, Geometry key) {
 		PredicateOptions opts = PredicateOptions.create();
 		ScriptUtils.getBooleanOption(args, "negated").ifPresent(opts::negated);
 		
-		Geometry geomKey = (key instanceof Envelope )
-						? GeoClientUtils.toPolygon((Envelope)key)
-						: (Geometry)key;
-		
-		filterSpatially(geomCol, rel, geomKey, opts);
+		filterSpatially(geomCol, rel, key, opts);
+		return this;
+	}
+
+	public GPlanBuilder intersection(Map<String,Object> args, String leftGeomCol,
+										Geometry geom) {
+		GeomOpOptions opts = ScriptUtils.parseGeomOpOptions(args);
+		super.intersection(leftGeomCol, geom, opts);
 		return this;
 	}
 
@@ -335,22 +383,22 @@ public class GPlanBuilder extends PlanBuilder {
 	}
 	
 	public GDataSet dataset(String id) {
-		return new GDataSet(id);
+		return new GDataSet(m_marmot, id);
 	}
 	
 	public JdbcConnectOptions jdbcConnection(Closure decl) {
 		return ScriptUtils.parseJdbcConnectOptions(decl);
 	}
 	
-	public Group group(Map<String,Object> args) {
-		return ScriptUtils.parseGroup(args);
-	}
-	public Group group(Map<String,Object> args, String keys) {
-		return ScriptUtils.parseGroup(args, keys);
-	}
-	public Group group(String keys) {
-		return ScriptUtils.parseGroup(Maps.newHashMap(), keys);
-	}
+//	public Group group(Map<String,Object> args) {
+//		return ScriptUtils.parseGroup(args);
+//	}
+//	public Group group(Map<String,Object> args, String keys) {
+//		return ScriptUtils.parseGroup(args, keys);
+//	}
+//	public Group group(String keys) {
+//		return ScriptUtils.parseGroup(Maps.newHashMap(), keys);
+//	}
 	
 	public SpatialRelation getIntersects() {
 		return SpatialRelation.INTERSECTS;
@@ -366,6 +414,10 @@ public class GPlanBuilder extends PlanBuilder {
 	
 	public Geometry wkt(String wktStr) throws ParseException {
 		return GeoClientUtils.fromWKT(wktStr);
+	}
+	
+	public Geometry geometry(Envelope envl) throws ParseException {
+		return GeoClientUtils.toPolygon(envl);
 	}
 	
 	public Envelope envelope(Map<String,Double> coords) {
@@ -384,9 +436,13 @@ public class GPlanBuilder extends PlanBuilder {
 		}
 	}
 	
-	
 	public Size2d size2d(String str) {
 		return ScriptUtils.parseSize2d(str);
+	}
+	public Size2d size2d(Object widthExpr, Object heightExpr) {
+		double width = ScriptUtils.parseDistance(widthExpr);
+		double height = ScriptUtils.parseDistance(heightExpr);
+		return new Size2d(width, height);
 	}
 
 	

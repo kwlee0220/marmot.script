@@ -3,19 +3,29 @@ package marmot.script;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.vividsolutions.jts.geom.Geometry;
 
 import groovy.lang.Closure;
 import marmot.DataSet;
+import marmot.ExecutePlanOptions;
 import marmot.MarmotRuntime;
 import marmot.Plan;
+import marmot.Record;
+import marmot.RecordSet;
 import marmot.script.command.ClusterDataSetCommand;
 import marmot.script.command.CreateDataSetCommand;
 import marmot.script.command.DeleteDataSetCommand;
+import marmot.script.command.ExecuteProcessCommand;
 import marmot.script.command.ImportCsvFileCommand;
 import marmot.script.command.ImportExcelFileCommand;
 import marmot.script.command.ImportShapefileCommand;
 import marmot.script.command.MoveDataSetCommand;
 import marmot.script.command.RunPlanCommand;
+import marmot.script.command.RunPlanToGeometry;
+import marmot.script.command.RunPlanToLong;
+import marmot.script.command.RunPlanToRecord;
+import marmot.script.command.RunPlanToRecordSet;
+import marmot.script.command.RunPlanToString;
 import marmot.script.command.ScriptCommand;
 import utils.StopWatch;
 
@@ -63,6 +73,51 @@ public class CommandScriptRunner extends GroovyDslClass {
 		return execute(cmd);
 	}
 	
+	public RecordSet runPlanToRecordSet(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToRecordSet cmd = new RunPlanToRecordSet(m_marmot, plan, opts);
+		return execute(cmd);
+	}
+	public RecordSet runPlanToRecordSet(Plan plan) {
+		return runPlanToRecordSet(Maps.newHashMap(), plan);
+	}
+	
+	public Record runPlanToRecord(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToRecord cmd = new RunPlanToRecord(m_marmot, plan, opts);
+		return execute(cmd);
+	}
+	public Record runPlanToRecord(Plan plan) {
+		return runPlanToRecord(Maps.newHashMap(), plan);
+	}
+	
+	public Geometry runPlanToGeometry(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToGeometry cmd = new RunPlanToGeometry(m_marmot, plan, opts);
+		return execute(cmd);
+	}
+	public Geometry runPlanToGeometry(Plan plan) {
+		return runPlanToGeometry(Maps.newHashMap(), plan);
+	}
+	
+	public Long runPlanToLong(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToLong cmd = new RunPlanToLong(m_marmot, plan, opts);
+		return execute(cmd);
+	}
+	public Long runPlanToLong(Plan plan) {
+		return runPlanToLong(Maps.newHashMap(), plan);
+	}
+	
+	public String runPlanToString(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		RunPlanToString cmd = new RunPlanToString(m_marmot, plan, opts);
+		return execute(cmd);
+	}
+	public String runPlanToString(Plan plan) {
+		return runPlanToString(Maps.newHashMap(), plan);
+	}
+	
 	public long importShapefile(Map<String,Object> args, String shpPath,
 												String dsId) {
 		ImportShapefileCommand cmd = new ImportShapefileCommand(m_marmot, shpPath, dsId, args);
@@ -85,8 +140,17 @@ public class CommandScriptRunner extends GroovyDslClass {
 		return importExcelFile(ScriptUtils.options(optDecl), shpPath, dsId);
 	}
 	
+	public Void executeProcess(Map<String,Object> args, String procName) {
+		ExecuteProcessCommand cmd = new ExecuteProcessCommand(m_marmot, procName, args);
+		return execute(cmd);
+	}
+	
+	//
+	//
+	//
+	
 	public Plan plan(String name, Closure script) {
-		return ScriptUtils.parsePlan(name, script);
+		return ScriptUtils.parsePlan(m_marmot, name, script);
 	}
 	
 	public <T> T execute(ScriptCommand<T> cmd) {
@@ -110,5 +174,15 @@ public class CommandScriptRunner extends GroovyDslClass {
 			}
 			throw e;
 		}
+	}
+	
+	private ExecutePlanOptions parseExecutePlanOptions(Map<String,Object> args) {
+		ExecutePlanOptions opts = ExecutePlanOptions.create();
+		ScriptUtils.getBooleanOption(args, "disableLocalExec")
+					.ifPresent(opts::disableLocalExecution);
+		ScriptUtils.getStringOption(args, "mapOutputCompressionCodec")
+					.ifPresent(opts::mapOutputCompressionCodec);
+		
+		return opts;
 	}
 }

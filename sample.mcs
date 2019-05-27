@@ -1,5 +1,5 @@
 
-createDataset 'tmp/result' options {
+createDataset('tmp/result') {
 	geometry 'the_geom(EPSG:5186)'
 	force = true
 	from plan('create_plan') {
@@ -7,21 +7,21 @@ createDataset 'tmp/result' options {
 		filter 'trnsit_yn==1'
 	}
 }
-cluster_dataset '교통/지하철/서울역사'
+clusterDataset '교통/지하철/서울역사'
 
 deleteDataset 'tmp/result'
 deleteDataset 'tmp/result2'
 
-createDataset 'tmp/result2' options {
+createDataset('tmp/result2') {
 	from plan('create_plan') {
-		load '교통/지하철/서울역사
+		load '교통/지하철/서울역사'
 		filter 'trnsit_yn==1'
 		project 'KOR_SUB_NM'
 	}
 }
-moveDataset 'tmp/result2' to 'tmp/result'
+moveDataset 'tmp/result2', 'tmp/result'
 
-createDataset 'tmp/result' options {
+createDataset('tmp/result') {
 	geometry 'the_geom(EPSG:5186)'
 	schema {
 		the_geom multi_polygon
@@ -30,12 +30,29 @@ createDataset 'tmp/result' options {
 	force = true
 }
 
-createDataset 'tmp/result' options {
+createDataset('tmp/result') {
 	geometry 'the_geom(EPSG:5186)'
 	force = true
 	from plan('create_plan') {
-		load_text '교통/지하철/서울역사'
+		loadTextFile '교통/지하철/서울역사'
 		filter 'trnsit_yn==1'
 		project 'KOR_SUB_NM'
 	}
+}
+
+runPlanToGeometry plan("get_seoul") {
+	load("구역/시도")
+	filter("ctprvn_cd == '11'")
+}
+
+runPlanToGeometry(disableLocalExec: false, mapOutputCompressionCode: 'Snappy',
+	plan("get_seoul") {
+		load("구역/시도")
+		filter("ctprvn_cd == '11'")
+	}
+)
+
+runPlanToRecordSet plan("get_seoul") {
+	load("구역/시도")
+	filter("ctprvn_cd == '11'")
 }

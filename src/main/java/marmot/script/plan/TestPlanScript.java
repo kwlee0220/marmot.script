@@ -3,6 +3,8 @@ package marmot.script.plan;
 import java.io.File;
 
 import marmot.Plan;
+import marmot.command.MarmotClientCommands;
+import marmot.remote.protobuf.PBMarmotClient;
 
 /**
  * 
@@ -10,7 +12,9 @@ import marmot.Plan;
  */
 public class TestPlanScript {
 	public static final void main(String... args) throws Exception {
-		PlanScriptParser parser = new PlanScriptParser();
+		PBMarmotClient marmot = MarmotClientCommands.connect();
+		
+		PlanScriptParser parser = new PlanScriptParser(marmot);
 		Plan plan = parser.parse("sample_plan", new File("sample_plan.mps"));
 		
 		System.out.println(plan.toJson());

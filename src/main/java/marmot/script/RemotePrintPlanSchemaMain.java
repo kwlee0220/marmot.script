@@ -54,7 +54,7 @@ public class RemotePrintPlanSchemaMain implements CheckedConsumer<MarmotRuntime>
 
 	@Override
 	public void accept(MarmotRuntime marmot) throws Exception {
-		PlanScriptParser parser = new PlanScriptParser();
+		PlanScriptParser parser = new PlanScriptParser(marmot);
 		
 		Plan plan = (m_planFile != null)
 					? parser.parse("sample_plan", new File(m_planFile))
