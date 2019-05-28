@@ -8,6 +8,7 @@ import groovy.lang.Closure;
 import marmot.ExecutePlanOptions;
 import marmot.MarmotRuntime;
 import marmot.Plan;
+import marmot.RecordSchema;
 import marmot.script.command.ClusterDataSetCommand;
 import marmot.script.command.CreateDataSetCommand;
 import marmot.script.command.DeleteDataSetCommand;
@@ -22,6 +23,7 @@ import marmot.script.command.RunPlanToLong;
 import marmot.script.command.RunPlanToRecord;
 import marmot.script.command.RunPlanToRecordSet;
 import marmot.script.command.RunPlanToString;
+import utils.Size2d;
 
 
 /**
@@ -194,5 +196,18 @@ public class CommandScriptParser extends GroovyDslClass {
 					.ifPresent(opts::mapOutputCompressionCodec);
 		
 		return opts;
+	}
+	
+	public Size2d size2d(String str) {
+		return ScriptUtils.parseSize2d(str);
+	}
+	public Size2d size2d(Object widthExpr, Object heightExpr) {
+		double width = ScriptUtils.parseDistance(widthExpr);
+		double height = ScriptUtils.parseDistance(heightExpr);
+		return new Size2d(width, height);
+	}
+	
+	public RecordSchema schema(String decl) {
+		return RecordSchema.parse(decl);
 	}
 }
