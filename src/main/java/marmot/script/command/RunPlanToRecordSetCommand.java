@@ -11,12 +11,12 @@ import marmot.script.GroovyDslClass;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class RunPlanToRecordSet extends GroovyDslClass implements ScriptCommand<RecordSet> {
+public class RunPlanToRecordSetCommand extends GroovyDslClass implements ScriptCommand<RecordSet> {
 	private final MarmotRuntime m_marmot;
 	private final Plan m_plan;
 	private final ExecutePlanOptions m_opts;
 	
-	public RunPlanToRecordSet(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
+	public RunPlanToRecordSetCommand(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
 		m_marmot = marmot;
 		m_plan = plan;
 		m_opts = opts;

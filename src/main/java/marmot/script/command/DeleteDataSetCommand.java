@@ -21,7 +21,13 @@ public class DeleteDataSetCommand extends GroovyDslClass
 	@Override
 	public Void execute() {
 		for ( String id: m_dsIds ) {
-			m_marmot.deleteDataSet(id);
+			try {
+				m_marmot.getDataSet(id);
+				m_marmot.deleteDataSet(id);
+			}
+			catch ( Exception e ) {
+				m_marmot.deleteDir(id);
+			}
 		}
 		
 		return null;

@@ -109,12 +109,12 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 
 	@Override
 	public RecordSet read() {
-		return m_ds.read();
+		return new GRecordSet(m_ds.read());
 	}
 
 	@Override
 	public RecordSet queryRange(Envelope range, FOption<String> filterExpr) {
-		return m_ds.queryRange(range, filterExpr);
+		return new GRecordSet(m_ds.queryRange(range, filterExpr));
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 
 	@Override
 	public RecordSet readSpatialCluster(String quadKey) {
-		return m_ds.readSpatialCluster(quadKey);
+		return new GRecordSet(m_ds.readSpatialCluster(quadKey));
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	@Override
 	public RecordSet readThumbnail(Envelope bounds, int count)
 			throws ThumbnailNotFoundException, InsufficientThumbnailException {
-		return m_ds.readThumbnail(bounds, count);
+		return new GRecordSet(m_ds.readThumbnail(bounds, count));
 	}
 
 	@Override

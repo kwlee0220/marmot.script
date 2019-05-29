@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Envelope;
 
 import groovy.lang.Closure;
+import marmot.ExecutePlanOptions;
 import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.Plan;
@@ -147,6 +148,16 @@ public class ScriptUtils {
 				throw new IllegalArgumentException("incorrect GeometryColumnInfo: " + info);
 			}
 		});
+		
+		return opts;
+	}
+	
+	public static ExecutePlanOptions parseExecutePlanOptions(Map<String,Object> args) {
+		ExecutePlanOptions opts = ExecutePlanOptions.create();
+		ScriptUtils.getBooleanOption(args, "disableLocalExec")
+					.ifPresent(opts::disableLocalExecution);
+		ScriptUtils.getStringOption(args, "mapOutputCompressionCodec")
+					.ifPresent(opts::mapOutputCompressionCodec);
 		
 		return opts;
 	}

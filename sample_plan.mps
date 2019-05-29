@@ -1,5 +1,5 @@
 
-def jdbcOptions = jdbcConnection {
+def jdbcOptions = JDBC {
 				url "jdbc:postgresql://129.254.82.95:5433/sbdata"
 				user "sbdata"
 				passwd "urc2004"
@@ -49,7 +49,7 @@ listByGroup('col1,col2', tags: 'col3,col4', orderBy: 'col5:DESC,col6:ASC')
 storeByGroup('col1', "/tmp/result")
 storeByGroup('col1', "/tmp/result", force:true)
 
-def outSchema = schema("name:string,age:int,value:double")
+def outSchema = RecordSchema("name:string,age:int,value:double")
 reduceToSingleRecordByGroup('col1', outSchema, 'tag', 'value')
 
 parseCsv('text') {
@@ -79,19 +79,19 @@ centroid('the_geom', output: 'the_geom2')
 
 transformCrs('the_geom', 'EPSG:5186', 'EPSG:4326')
 
-intersection('the_geom', wkt('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))'))
+intersection('the_geom', WKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))'))
 
 toXY 'the_geom', 'x_pos', 'y_pos'
 toXY 'the_geom', 'x_pos', 'y_pos', keepGeomColumn: true
 toPoint 'x_pos', 'y_pos', 'the_geom' 
 
-filterSpatially('the_geom', intersects, wkt('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) 
-filterSpatially('the_geom', withinDistance('4km'), envelope(minx: 0, miny: 0, maxx: 1, maxy:1))
-filterSpatially('the_geom', intersects, dataset('구역/시도').bounds) 
+filterSpatially('the_geom', intersects, WKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) 
+filterSpatially('the_geom', withinDistance('4km'), Envelope(minx: 0, miny: 0, maxx: 1, maxy:1))
+filterSpatially('the_geom', intersects, DataSet('구역/시도').bounds) 
 
-query 'POI/노인복지시설', envelope(minx: 0, miny: 0, maxx: 1, maxy:1) 
-query 'POI/노인복지시설', wkt('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')
-query 'POI/노인복지시설', dataset('xxx'), negated:true
+query 'POI/노인복지시설', Envelope(minx: 0, miny: 0, maxx: 1, maxy:1) 
+query 'POI/노인복지시설', WKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')
+query 'POI/노인복지시설', DataSet('xxx'), negated:true
 
 spatialJoin 'the_geom', "tmp/10min/high_density_center", output: 'the_geom,*-{the_geom}'
 spatialJoin 'the_geom', "tmp/10min/high_density_center", output: "*,param.col1"
@@ -106,11 +106,11 @@ spatialOuterJoin 'the_geom', "tmp/10min/high_density_center", output: "*,param.c
 clipJoin 'the_geom', "tmp/10min/high_density_hdong"
 intersectionJoin 'the_geom', "tmp/10min/high_density_hdong", output: "*"
 
-loadGrid squareGrid(envelope(minx: 10, miny: 20, maxx: 30, maxy:40), size2d('10x20'))
-loadGrid squareGrid(dataset('xxx'), size2d('10x20')), splitCount: 7
+loadGrid SquareGrid(Envelope(minx: 10, miny: 20, maxx: 30, maxy:40), Size2d('10x20'))
+loadGrid SquareGrid(DataSet('xxx'), Size2d('10x20')), splitCount: 7
 
-assignGridCell('the_geom', squareGrid(envelope(minx: 10, miny: 20, maxx: 30, maxy:40), size2d('10x20')))
-assignGridCell('the_geom', squareGrid(dataset('xxx'), size2d('10x20')), assignOutside: true)
+assignGridCell('the_geom', SquareGrid(Envelope(minx: 10, miny: 20, maxx: 30, maxy:40), Size2d('10x20')))
+assignGridCell('the_geom', SquareGrid(DataSet('xxx'), Size2d('10x20')), assignOutside: true)
 
 storeAsCsv 'tmp/csv', delim: '|', quote: '"', charset: 'euc-kr'
 storeAsCsv 'tmp/csv'

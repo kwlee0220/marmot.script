@@ -1,21 +1,21 @@
 package marmot.script.plan;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
 
 import groovy.lang.Closure;
 import marmot.MarmotRuntime;
+import marmot.Plan;
 import marmot.PlanBuilder;
 import marmot.RecordSchema;
 import marmot.RecordScript;
 import marmot.StoreDataSetOptions;
-import marmot.geo.GeoClientUtils;
 import marmot.optor.AggregateFunction;
 import marmot.optor.JoinOptions;
 import marmot.optor.JoinType;
@@ -29,42 +29,57 @@ import marmot.plan.LoadJdbcTableOptions;
 import marmot.plan.LoadOptions;
 import marmot.plan.PredicateOptions;
 import marmot.plan.SpatialJoinOptions;
+import marmot.script.ScriptParsingObject;
 import marmot.script.ScriptUtils;
 import marmot.script.dslobj.AggregateFunctionListParser;
 import marmot.script.dslobj.GDataSet;
-import marmot.script.dslobj.OptionsParser;
-import utils.Size2d;
 import utils.func.FOption;
 
 /**
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class GPlanBuilder extends PlanBuilder {
-	private final MarmotRuntime m_marmot;
+public class GPlanBuilder extends ScriptParsingObject {
+	private final PlanBuilder m_builder;
 	
 	public GPlanBuilder(MarmotRuntime marmot, String name) {
-		super(name);
+		super(marmot);
 		
-		m_marmot = marmot;
+		m_builder = new PlanBuilder(name);
+	}
+	
+	public Plan build() {
+		return m_builder.build();
 	}
 	
 	public GPlanBuilder load(Map<String,Object> args, String dsId) {
-		super.load(dsId, ScriptUtils.parseLoadOptions(args));
+		m_builder.load(dsId, ScriptUtils.parseLoadOptions(args));
 		return this;
+	}
+	public GPlanBuilder load(String dsId) {
+		return load(new HashMap<>(), dsId);
 	}
 
 	public GPlanBuilder loadTextFile(String... paths) {
-		super.loadTextFile(Arrays.asList(paths), LoadOptions.create());
+		m_builder.loadTextFile(Arrays.asList(paths), LoadOptions.create());
 		return this;
 	}
 	public GPlanBuilder loadTextFile(Map<String,Object> args, String... paths) {
-		super.loadTextFile(Arrays.asList(paths), ScriptUtils.parseLoadOptions(args));
+		m_builder.loadTextFile(Arrays.asList(paths), ScriptUtils.parseLoadOptions(args));
 		return this;
 	}
 
 	public GPlanBuilder filter(Map<String,Object> args, String pred) {
-		super.filter(ScriptUtils.parseRecordScript(args, pred));
+		m_builder.filter(ScriptUtils.parseRecordScript(args, pred));
+		return this;
+	}
+	public GPlanBuilder filter(String pred) {
+		m_builder.filter(pred);
+		return this;
+	}
+	
+	public GPlanBuilder project(String columnSelection) {
+		m_builder.project(columnSelection);
 		return this;
 	}
 	
@@ -72,12 +87,24 @@ public class GPlanBuilder extends PlanBuilder {
 		RecordScript script = ScriptUtils.getStringOption(args, "initializer")
 								.map(init -> RecordScript.of(initValue, init))
 								.getOrElse(() -> RecordScript.of(initValue));
-		super.defineColumn(colDecl, script);
+		m_builder.defineColumn(colDecl, script);
+		return this;
+	}
+	public GPlanBuilder defineColumn(String colDecl) {
+		m_builder.defineColumn(colDecl);
+		return this;
+	}
+	public GPlanBuilder defineColumn(String colDecl, String initValue) {
+		m_builder.defineColumn(colDecl, initValue);
 		return this;
 	}
 	
 	public GPlanBuilder update(Map<String,Object> args, String expr) {
-		super.update(ScriptUtils.parseRecordScript(args, expr));
+		m_builder.update(ScriptUtils.parseRecordScript(args, expr));
+		return this;
+	}
+	public GPlanBuilder update(String expr) {
+		m_builder.update(expr);
 		return this;
 	}
 	
@@ -85,38 +112,80 @@ public class GPlanBuilder extends PlanBuilder {
 		RecordScript script = ScriptUtils.getStringOption(args, "initializer")
 								.map(init -> RecordScript.of(updExpr, init))
 								.getOrElse(() -> RecordScript.of(updExpr));
-		super.expand(colDecl, script);
+		m_builder.expand(colDecl, script);
+		return this;
+	}
+	public GPlanBuilder expand(String colDecl) {
+		m_builder.expand(colDecl);
+		return this;
+	}
+	public GPlanBuilder expand(String colDecl, String updExpr) {
+		m_builder.expand(colDecl, updExpr);
+		return this;
+	}
+	
+	public GPlanBuilder take(long count) {
+		m_builder.take(count);
+		return this;
+	}
+	
+	public GPlanBuilder assignUid(String uidColName) {
+		m_builder.assignUid(uidColName	);
+		return this;
+	}
+	
+	public GPlanBuilder sample(double sampleRatio) {
+		m_builder.sample(sampleRatio);
+		return this;
+	}
+	
+	public GPlanBuilder shard(int partCount) {
+		m_builder.shard(partCount);
+		return this;
+	}
+	
+	public GPlanBuilder pickTopK(String keyCols, int count) {
+		m_builder.pickTopK(keyCols, count);
+		return this;
+	}
+	
+	public GPlanBuilder sort(String cmpKeyCols) {
+		m_builder.sort(cmpKeyCols);
 		return this;
 	}
 	
 	public GPlanBuilder distinct(Map<String,Object> args, String keyCols) {
 		ScriptUtils.getIntOption(args, "workerCount")
-					.ifPresent(cnt -> super.distinct(keyCols, cnt))
-					.ifAbsent(() -> super.distinct(keyCols));
+					.ifPresent(cnt -> m_builder.distinct(keyCols, cnt))
+					.ifAbsent(() -> m_builder.distinct(keyCols));
+		return this;
+	}
+	public GPlanBuilder distinct(String keyCols) {
+		m_builder.distinct(keyCols);
 		return this;
 	}
 	
-	public GPlanBuilder aggregate(Closure aggrsDecl) {
+	public GPlanBuilder aggregate(Closure<?> aggrsDecl) {
 		List<AggregateFunction> aggrs = new AggregateFunctionListParser().parse(aggrsDecl);
-		super.aggregate(aggrs.toArray(new AggregateFunction[0]));
+		m_builder.aggregate(aggrs.toArray(new AggregateFunction[0]));
 		return this;
 	}
 	
 	public GPlanBuilder aggregateByGroup(Map<String,Object> args, String keyCols,
-										Closure aggrsDecl) {
+										Closure<?> aggrsDecl) {
 		Group group = ScriptUtils.parseGroup(args, keyCols);
 		List<AggregateFunction> aggrs = new AggregateFunctionListParser().parse(aggrsDecl);
-		super.aggregateByGroup(group, aggrs.toArray(new AggregateFunction[0]));
+		m_builder.aggregateByGroup(group, aggrs.toArray(new AggregateFunction[0]));
 		return this;
 	}
-	public GPlanBuilder aggregateByGroup(String keyCols, Closure aggrsDecl) {
+	public GPlanBuilder aggregateByGroup(String keyCols, Closure<?> aggrsDecl) {
 		return aggregateByGroup(Maps.newHashMap(), keyCols, aggrsDecl);
 	}
 
 	public GPlanBuilder aggregateByGroup(Map<String,Object> args, String keyCols,
 										List<AggregateFunction> aggrList) {
 		Group group = ScriptUtils.parseGroup(args, keyCols);
-		super.aggregateByGroup(group, aggrList.toArray(new AggregateFunction[0]));
+		m_builder.aggregateByGroup(group, aggrList.toArray(new AggregateFunction[0]));
 		return this;
 	}
 	public GPlanBuilder aggregateByGroup(String keyCols, List<AggregateFunction> aggrList) {
@@ -125,7 +194,7 @@ public class GPlanBuilder extends PlanBuilder {
 	
 	public GPlanBuilder takeByGroup(Map<String,Object> args, String keyCols, int count) {
 		Group group = ScriptUtils.parseGroup(args, keyCols);
-		super.takeByGroup(group, count);
+		m_builder.takeByGroup(group, count);
 		return this;
 	}
 	public GPlanBuilder takeByGroup(String keyCols, int count) {
@@ -134,7 +203,7 @@ public class GPlanBuilder extends PlanBuilder {
 	
 	public GPlanBuilder listByGroup(Map<String,Object> args, String keyCols) {
 		Group group = ScriptUtils.parseGroup(args, keyCols);
-		super.listByGroup(group);
+		m_builder.listByGroup(group);
 		return this;
 	}
 	public GPlanBuilder listByGroup(String keyCols) {
@@ -144,7 +213,7 @@ public class GPlanBuilder extends PlanBuilder {
 	public GPlanBuilder storeByGroup(Map<String,Object> args, String keyCols, String rootPath) {
 		Group group = ScriptUtils.parseGroup(args, keyCols);
 		StoreDataSetOptions opts = ScriptUtils.parseStoreDataSetOptions(args);
-		super.storeByGroup(group, rootPath, opts);
+		m_builder.storeByGroup(group, rootPath, opts);
 		return this;
 	}
 	public GPlanBuilder storeByGroup(String keyCols, String rootPath) {
@@ -155,7 +224,7 @@ public class GPlanBuilder extends PlanBuilder {
 													RecordSchema outSchema,
 													String tagCol, String valueCol) {
 		Group group = ScriptUtils.parseGroup(args, keyCols);
-		super.reduceToSingleRecordByGroup(group, outSchema, tagCol, valueCol);
+		m_builder.reduceToSingleRecordByGroup(group, outSchema, tagCol, valueCol);
 		return this;
 	}
 	public GPlanBuilder reduceToSingleRecordByGroup(String keyCols, RecordSchema outSchema,
@@ -163,14 +232,11 @@ public class GPlanBuilder extends PlanBuilder {
 		return reduceToSingleRecordByGroup(Maps.newHashMap(), keyCols, outSchema, tagCol, valueCol);
 	}
 
-	public GPlanBuilder parseCsv(Map<String,Object> args, String csvColumn, Closure csvDecls) {
-		if ( csvDecls != null ) {
-			args = options(args, csvDecls);
-		}
-		super.parseCsv(csvColumn, ScriptUtils.parseParseCsvOptions(args));
+	public GPlanBuilder parseCsv(Map<String,Object> args, String csvColumn, Closure<?> csvDecls) {
+		m_builder.parseCsv(csvColumn, ScriptUtils.parseParseCsvOptions(args));
 		return this;
 	}
-	public GPlanBuilder parseCsv(String csvColumn, Closure csvDecls) {
+	public GPlanBuilder parseCsv(String csvColumn, Closure<?> csvDecls) {
 		return parseCsv(Maps.newHashMap(), csvColumn, csvDecls);
 	}
 	public GPlanBuilder parseCsv(String csvColumn) {
@@ -186,8 +252,11 @@ public class GPlanBuilder extends PlanBuilder {
 		ScriptUtils.getBooleanOption(args, "headerFirst").ifPresent(opts::headerFirst);
 		ScriptUtils.getLongOption(args, "blockSize").ifPresent(opts::blockSize);
 		
-		super.storeAsCsv(path, opts);
+		m_builder.storeAsCsv(path, opts);
 		return this;
+	}
+	public GPlanBuilder storeAsCsv(String path) {
+		return storeAsCsv(Maps.newHashMap(), path);
 	}
 
 	public GPlanBuilder hashJoin(Map<String,Object> args, String inputJoinCols,
@@ -206,7 +275,7 @@ public class GPlanBuilder extends PlanBuilder {
 										.getOrElse(() -> JoinOptions.INNER_JOIN());
 		ScriptUtils.getIntOption(args, "workerCount").ifPresent(jopts::workerCount);
 		
-		super.hashJoin(inputJoinCols, paramDataSet, paramJoinCols, outJoinCols, jopts);
+		m_builder.hashJoin(inputJoinCols, paramDataSet, paramJoinCols, outJoinCols, jopts);
 		return this;
 	}
 
@@ -227,54 +296,80 @@ public class GPlanBuilder extends PlanBuilder {
 										.getOrElse(() -> JoinOptions.INNER_JOIN());
 		ScriptUtils.getIntOption(args, "workerCount").ifPresent(jopts::workerCount);
 		
-		super.loadHashJoinFile(leftDsId, leftJoinCols, rightDsId, rightJoinCols, outJoinCols, jopts);
+		m_builder.loadHashJoinFile(leftDsId, leftJoinCols, rightDsId, rightJoinCols, outJoinCols, jopts);
 		return this;
 	}
 
 	public GPlanBuilder buffer(Map<String,Object> args, String geomCol, double dist) {
 		GeomOpOptions opts = ScriptUtils.parseGeomOpOptions(args);
 		FOption<Integer> segCount = ScriptUtils.getIntOption(args, "segmentCount");
-		super.buffer(geomCol, dist, segCount, opts);
+		m_builder.buffer(geomCol, dist, segCount, opts);
+		return this;
+	}
+	public GPlanBuilder buffer(String geomCol, double dist) {
+		m_builder.buffer(geomCol, dist);
 		return this;
 	}
 
 	public GPlanBuilder centroid(Map<String,Object> args, String geomCol) {
 		GeomOpOptions opts = ScriptUtils.parseGeomOpOptions(args);
-		super.centroid(geomCol, opts);
+		m_builder.centroid(geomCol, opts);
+		return this;
+	}
+	public GPlanBuilder centroid(String geomCol) {
+		m_builder.centroid(geomCol);
 		return this;
 	}
 
 	public GPlanBuilder toXY(Map<String,Object> args, String geomCol, String xCol, String yCol) {
 		boolean keepGeomColumn = ScriptUtils.getBooleanOption(args, "keepGeomColumn")
 											.getOrElse(false);
-		super.toXY(geomCol, xCol, yCol, keepGeomColumn);
+		m_builder.toXY(geomCol, xCol, yCol, keepGeomColumn);
+		return this;
+	}
+	public GPlanBuilder toXY(String geomCol, String xCol, String yCol) {
+		m_builder.toXY(geomCol, xCol, yCol);
+		return this;
+	}
+	
+	public GPlanBuilder toPoint(String xCol, String yCol, String geomCol) {
+		m_builder.toPoint(xCol, yCol, geomCol);
 		return this;
 	}
 
-	public GPlanBuilder filterSpatially(String geomCol, SpatialRelation rel, Geometry key) {
-		super.filterSpatially(geomCol, rel, key);
+	public GPlanBuilder filterSpatially(String geomCol, SpatialRelation rel, Object key) {
+		m_builder.filterSpatially(geomCol, rel, Geometry(key));
 		return this;
 	}
 	public GPlanBuilder filterSpatially(Map<String,Object> args, String geomCol,
-										SpatialRelation rel, Geometry key) {
+										SpatialRelation rel, Object key) {
 		PredicateOptions opts = PredicateOptions.create();
 		ScriptUtils.getBooleanOption(args, "negated").ifPresent(opts::negated);
 		
-		filterSpatially(geomCol, rel, key, opts);
+		m_builder.filterSpatially(geomCol, rel, Geometry(key), opts);
+		return this;
+	}
+
+	public GPlanBuilder transformCrs(String geomCol, String srcSrid, String tarSrid) {
+		m_builder.transformCrs(geomCol, srcSrid, tarSrid);
 		return this;
 	}
 
 	public GPlanBuilder intersection(Map<String,Object> args, String leftGeomCol,
 										Geometry geom) {
 		GeomOpOptions opts = ScriptUtils.parseGeomOpOptions(args);
-		super.intersection(leftGeomCol, geom, opts);
+		m_builder.intersection(leftGeomCol, geom, opts);
+		return this;
+	}
+	public GPlanBuilder intersection(String leftGeomCol, Geometry geom) {
+		m_builder.intersection(leftGeomCol, geom);
 		return this;
 	}
 
 	public GPlanBuilder intersection(Map<String,Object> args, String leftGeomCol,
 										String rightGeomCol) {
 		String outGeomCol = ScriptUtils.getOrThrow(args, "output");
-		super.intersection(leftGeomCol, rightGeomCol, outGeomCol);
+		m_builder.intersection(leftGeomCol, rightGeomCol, outGeomCol);
 		return this;
 	}
 
@@ -285,13 +380,13 @@ public class GPlanBuilder extends PlanBuilder {
 		PredicateOptions opts = ScriptUtils.parsePredicateOptions(args);
 		
 		if ( key instanceof Geometry ) {
-			super.query(dsId, (Geometry)key, opts);
+			m_builder.query(dsId, (Geometry)key, opts);
 		}
 		else if ( key instanceof GDataSet ) {
-			super.query(dsId, ((GDataSet)key).getId(), opts);
+			m_builder.query(dsId, ((GDataSet)key).getId(), opts);
 		}
 		else if ( key instanceof Envelope ) {
-			super.query(dsId, (Envelope)key, opts);
+			m_builder.query(dsId, (Envelope)key, opts);
 		}
 		else {
 			throw new IllegalArgumentException("invalid key object: " + key);
@@ -304,49 +399,56 @@ public class GPlanBuilder extends PlanBuilder {
 									String paramDsId) {
 		SpatialJoinOptions opts = ScriptUtils.parseSpatialJoinOptions(args);
 		
-		super.spatialJoin(geomCol, paramDsId, opts);
+		m_builder.spatialJoin(geomCol, paramDsId, opts);
 		return this;
 	}
 	public GPlanBuilder spatialSemiJoin(Map<String,Object> args, String geomCol,
 									String paramDsId) {
 		SpatialJoinOptions opts = ScriptUtils.parseSpatialJoinOptions(args);
 		
-		super.spatialSemiJoin(geomCol, paramDsId, opts);
+		m_builder.spatialSemiJoin(geomCol, paramDsId, opts);
 		return this;
+	}
+	public GPlanBuilder spatialSemiJoin(String geomCol, String paramDsId) {
+		return spatialSemiJoin(Maps.newHashMap(), geomCol, paramDsId);
 	}
 	public GPlanBuilder spatialOuterJoin(Map<String,Object> args, String geomCol,
 										String paramDsId) {
 		SpatialJoinOptions opts = ScriptUtils.parseSpatialJoinOptions(args);
 		
-		super.spatialOuterJoin(geomCol, paramDsId, opts);
+		m_builder.spatialOuterJoin(geomCol, paramDsId, opts);
 		return this;
 	}
 	public GPlanBuilder intersectionJoin(Map<String,Object> args, String geomCol,
 										String paramDsId) {
 		SpatialJoinOptions opts = ScriptUtils.parseSpatialJoinOptions(args);
 		
-		super.intersectionJoin(geomCol, paramDsId, opts);
+		m_builder.intersectionJoin(geomCol, paramDsId, opts);
+		return this;
+	}
+	public GPlanBuilder clipJoin(String geomCol, String paramDsId) {
+		m_builder.clipJoin(geomCol, paramDsId);
 		return this;
 	}
 	
-	public PlanBuilder loadGrid(Map<String,Object> args, SquareGrid grid) {
+	public GPlanBuilder loadGrid(Map<String,Object> args, SquareGrid grid) {
 		FOption<Integer> splitCount = ScriptUtils.getIntOption(args, "splitCount");
 		
-		splitCount.ifPresent(cnt -> super.loadGrid(grid, cnt))
-					.ifAbsent(() -> super.loadGrid(grid));
+		splitCount.ifPresent(cnt -> m_builder.loadGrid(grid, cnt))
+					.ifAbsent(() -> m_builder.loadGrid(grid));
 		return this;
 	}
-	public PlanBuilder loadGrid(SquareGrid grid) {
+	public GPlanBuilder loadGrid(SquareGrid grid) {
 		return loadGrid(Maps.newHashMap(), grid);
 	}
 	
-	public PlanBuilder assignGridCell(Map<String,Object> args, String geomCol, SquareGrid grid) {
+	public GPlanBuilder assignGridCell(Map<String,Object> args, String geomCol, SquareGrid grid) {
 		boolean assignOutside = ScriptUtils.getBooleanOption(args, "assignOutside")
 											.getOrElse(false);
-		super.assignGridCell(geomCol, grid, assignOutside);
+		m_builder.assignGridCell(geomCol, grid, assignOutside);
 		return this;
 	}
-	public PlanBuilder assignGridCell(String geomCol, SquareGrid grid) {
+	public GPlanBuilder assignGridCell(String geomCol, SquareGrid grid) {
 		return assignGridCell(Maps.newHashMap(), geomCol, grid);
 	}
 	
@@ -355,7 +457,7 @@ public class GPlanBuilder extends PlanBuilder {
 		ScriptUtils.getStringOption(args, "selectExpr").ifPresent(opts::selectExpr);
 		ScriptUtils.getIntOption(args, "mapperCount").ifPresent(opts::mapperCount);
 		
-		super.loadJdbcTable(tblName, jdbcOpts, opts);
+		m_builder.loadJdbcTable(tblName, jdbcOpts, opts);
 		return this;
 	}
 	public GPlanBuilder loadJdbcTable(Map<String,Object> args, String tblName) {
@@ -365,95 +467,11 @@ public class GPlanBuilder extends PlanBuilder {
 	public GPlanBuilder storeIntoJdbcTable(Map<String,Object> args, String tblName,
 											JdbcConnectOptions jdbcOpts) {
 		String valueExpr = ScriptUtils.getOrThrow(args, "valueExpr");
-		super.storeIntoJdbcTable(tblName, jdbcOpts, valueExpr);
+		m_builder.storeIntoJdbcTable(tblName, jdbcOpts, valueExpr);
 		return this;
 	}
 	
 	//
 	//
 	//
-	public JoinType getINNER_JOIN() { return JoinType.INNER_JOIN; }
-	public JoinType getLEFT_OUTER_JOIN() { return JoinType.LEFT_OUTER_JOIN; }
-	public JoinType getRIGHT_OUTER_JOIN() { return JoinType.RIGHT_OUTER_JOIN; }
-	public JoinType getFULL_OUTER_JOIN() { return JoinType.FULL_OUTER_JOIN; }
-	public JoinType getSEMI_JOIN() { return JoinType.SEMI_JOIN; }
-	
-	public RecordSchema schema(String decl) {
-		return RecordSchema.parse(decl);
-	}
-	
-	public GDataSet dataset(String id) {
-		return new GDataSet(m_marmot, id);
-	}
-	
-	public JdbcConnectOptions jdbcConnection(Closure decl) {
-		return ScriptUtils.parseJdbcConnectOptions(decl);
-	}
-	
-//	public Group group(Map<String,Object> args) {
-//		return ScriptUtils.parseGroup(args);
-//	}
-//	public Group group(Map<String,Object> args, String keys) {
-//		return ScriptUtils.parseGroup(args, keys);
-//	}
-//	public Group group(String keys) {
-//		return ScriptUtils.parseGroup(Maps.newHashMap(), keys);
-//	}
-	
-	public SpatialRelation getIntersects() {
-		return SpatialRelation.INTERSECTS;
-	}
-	
-	public SpatialRelation withinDistance(Object distExpr) {
-		return SpatialRelation.WITHIN_DISTANCE(distance(distExpr));
-	}
-	
-	public double distance(Object distExpr) {
-		return ScriptUtils.parseDistance(distExpr);
-	}
-	
-	public Geometry wkt(String wktStr) throws ParseException {
-		return GeoClientUtils.fromWKT(wktStr);
-	}
-	
-	public Geometry geometry(Envelope envl) throws ParseException {
-		return GeoClientUtils.toPolygon(envl);
-	}
-	
-	public Envelope envelope(Map<String,Double> coords) {
-		return ScriptUtils.parseEnvelope(coords);
-	}
-	
-	public SquareGrid squareGrid(Object bounds, Size2d cellSize) {
-		if ( bounds instanceof GDataSet ) {
-			return new SquareGrid(((GDataSet)bounds).getId(), cellSize);
-		}
-		else if ( bounds instanceof Envelope ) {
-			return new SquareGrid((Envelope)bounds, cellSize);
-		}
-		else {
-			throw new IllegalArgumentException("invalid square-grid bounds: " + bounds);
-		}
-	}
-	
-	public Size2d size2d(String str) {
-		return ScriptUtils.parseSize2d(str);
-	}
-	public Size2d size2d(Object widthExpr, Object heightExpr) {
-		double width = ScriptUtils.parseDistance(widthExpr);
-		double height = ScriptUtils.parseDistance(heightExpr);
-		return new Size2d(width, height);
-	}
-
-	
-	public Map<String,Object> options(Map<String,Object> args, Closure decl) {
-		OptionsParser parser = new OptionsParser(args);
-		ScriptUtils.callClosure(decl, parser);
-		return parser.getArguments();
-	}
-	public Map<String,Object> options(Closure decl) {
-		OptionsParser parser = new OptionsParser(Maps.newHashMap());
-		ScriptUtils.callClosure(decl, parser);
-		return parser.getArguments();
-	}
 }

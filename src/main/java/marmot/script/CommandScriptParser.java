@@ -21,7 +21,7 @@ import marmot.script.command.RunPlanCommand;
 import marmot.script.command.RunPlanToGeometry;
 import marmot.script.command.RunPlanToLong;
 import marmot.script.command.RunPlanToRecord;
-import marmot.script.command.RunPlanToRecordSet;
+import marmot.script.command.RunPlanToRecordSetCommand;
 import marmot.script.command.RunPlanToString;
 import utils.Size2d;
 
@@ -88,20 +88,20 @@ public class CommandScriptParser extends GroovyDslClass {
 		return cmd;
 	}
 	
-	public RunPlanToRecordSet runPlanToRecordSet(Map<String,Object> args, Plan plan) {
-		ExecutePlanOptions opts = parseExecutePlanOptions(args);
-		RunPlanToRecordSet cmd = new RunPlanToRecordSet(m_marmot, plan, opts);
+	public RunPlanToRecordSetCommand runPlanToRecordSet(Map<String,Object> args, Plan plan) {
+		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
+		RunPlanToRecordSetCommand cmd = new RunPlanToRecordSetCommand(m_marmot, plan, opts);
 		if ( m_verbose ) {
 			System.out.println(cmd);
 		}
 		return cmd;
 	}
-	public RunPlanToRecordSet runPlanToRecordSet(Plan plan) {
+	public RunPlanToRecordSetCommand runPlanToRecordSet(Plan plan) {
 		return runPlanToRecordSet(Maps.newHashMap(), plan);
 	}
 	
 	public RunPlanToRecord runPlanToRecord(Map<String,Object> args, Plan plan) {
-		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToRecord cmd = new RunPlanToRecord(m_marmot, plan, opts);
 		if ( m_verbose ) {
 			System.out.println(cmd);
@@ -113,7 +113,7 @@ public class CommandScriptParser extends GroovyDslClass {
 	}
 	
 	public RunPlanToGeometry runPlanToGeometry(Map<String,Object> args, Plan plan) {
-		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToGeometry cmd = new RunPlanToGeometry(m_marmot, plan, opts);
 		if ( m_verbose ) {
 			System.out.println(cmd);
@@ -125,7 +125,7 @@ public class CommandScriptParser extends GroovyDslClass {
 	}
 	
 	public RunPlanToLong runPlanToLong(Map<String,Object> args, Plan plan) {
-		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToLong cmd = new RunPlanToLong(m_marmot, plan, opts);
 		if ( m_verbose ) {
 			System.out.println(cmd);
@@ -137,7 +137,7 @@ public class CommandScriptParser extends GroovyDslClass {
 	}
 	
 	public RunPlanToString runPlanToString(Map<String,Object> args, Plan plan) {
-		ExecutePlanOptions opts = parseExecutePlanOptions(args);
+		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToString cmd = new RunPlanToString(m_marmot, plan, opts);
 		if ( m_verbose ) {
 			System.out.println(cmd);
@@ -186,16 +186,6 @@ public class CommandScriptParser extends GroovyDslClass {
 	
 	public Plan plan(String name, Closure script) {
 		return ScriptUtils.parsePlan(m_marmot, name, script);
-	}
-	
-	private ExecutePlanOptions parseExecutePlanOptions(Map<String,Object> args) {
-		ExecutePlanOptions opts = ExecutePlanOptions.create();
-		ScriptUtils.getBooleanOption(args, "disableLocalExec")
-					.ifPresent(opts::disableLocalExecution);
-		ScriptUtils.getStringOption(args, "mapOutputCompressionCodec")
-					.ifPresent(opts::mapOutputCompressionCodec);
-		
-		return opts;
 	}
 	
 	public Size2d size2d(String str) {
