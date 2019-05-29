@@ -3,6 +3,7 @@ package marmot.script.command;
 import java.io.File;
 import java.util.Map;
 
+import groovy.lang.Closure;
 import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.command.ImportParameters;
@@ -23,13 +24,13 @@ public class ImportExcelFileCommand extends GroovyDslClass
 	private ImportParameters m_importParams = new ImportParameters();
 	
 	public ImportExcelFileCommand(MarmotRuntime marmot, String path, String dsId,
-									Map<String,Object> args) {
+									Map<String,Object> args, Closure<?> optDecls) {
 		m_marmot = marmot;
 		m_path = path;
 
 		ScriptUtils.getBooleanOption(args, "headerFirst").ifPresent(m_excelParams::headerFirst);
 		ScriptUtils.getStringOption(args, "nullString").ifPresent(m_excelParams::nullString);
-		ScriptUtils.getStringOption(args, "shpSrid").ifPresent(m_excelParams::srid);
+		ScriptUtils.getStringOption(args, "srid").ifPresent(m_excelParams::srid);
 		ScriptUtils.getStringOption(args, "pointColumns").ifPresent(m_excelParams::pointColumns);
 
 		m_importParams.setDataSetId(dsId);
@@ -41,6 +42,60 @@ public class ImportExcelFileCommand extends GroovyDslClass
 		ScriptUtils.getOption(args, "blockSize")
 					.map(ScriptUtils::parseByteLength).ifPresent(m_importParams::setBlockSize);
 		ScriptUtils.getIntOption(args, "reportInterval").ifPresent(m_importParams::setReportInterval);
+		
+		if ( optDecls != null ) {
+			ScriptUtils.callClosure(optDecls, this);
+		}
+	}
+
+	public ImportExcelFileCommand headerFirst(boolean flag) {
+		m_excelParams.headerFirst(flag);
+		return this;
+	}
+	
+	public ImportExcelFileCommand srid(String srid) {
+		m_excelParams.srid(srid);
+		return this;
+	}
+	
+	public ImportExcelFileCommand nullString(String value) {
+		m_excelParams.nullString(value);
+		return this;
+	}
+	
+	public ImportExcelFileCommand pointColumns(String cols) {
+		m_excelParams.pointColumns(cols);
+		return this;
+	}
+	
+	public ImportExcelFileCommand geometry(String gcInfoStr) {
+		m_importParams.setGeometryColumnInfo(GeometryColumnInfo.fromString(gcInfoStr));
+		return this;
+	}
+	
+	public ImportExcelFileCommand force(boolean flag) {
+		m_importParams.setForce(flag);
+		return this;
+	}
+	
+	public ImportExcelFileCommand append(boolean flag) {
+		m_importParams.setAppend(flag);
+		return this;
+	}
+	
+	public ImportExcelFileCommand compression(boolean flag) {
+		m_importParams.setCompression(flag);
+		return this;
+	}
+	
+	public ImportExcelFileCommand blockSize(Object blkSize) {
+		m_importParams.setBlockSize(ScriptUtils.parseByteLength(blkSize));
+		return this;
+	}
+	
+	public ImportExcelFileCommand reportInterval(int intvl) {
+		m_importParams.setReportInterval(intvl);
+		return this;
 	}
 
 	@Override

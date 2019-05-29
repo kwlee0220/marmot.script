@@ -63,7 +63,7 @@ public class RemoteRunCommandScriptMain implements CheckedConsumer<MarmotRuntime
 			scriptEngine.evaluate(new File(m_scriptFile));
 		}
 		else {
-			scriptEngine.evaluate(System.in);
+			scriptEngine.evaluate(System.console().reader());
 		}
 	}
 }

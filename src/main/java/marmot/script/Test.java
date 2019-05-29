@@ -1,9 +1,7 @@
-package marmot.script.plan;
+package marmot.script;
 
 import java.io.File;
 
-import groovy.lang.Script;
-import marmot.Plan;
 import marmot.command.MarmotClientCommands;
 import marmot.remote.protobuf.PBMarmotClient;
 
@@ -11,13 +9,14 @@ import marmot.remote.protobuf.PBMarmotClient;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class TestPlanScript {
+public class Test {
 	public static final void main(String... args) throws Exception {
 		PBMarmotClient marmot = MarmotClientCommands.connect();
 		
-		PlanScriptParser parser = new PlanScriptParser(marmot);
-		Plan plan = parser.parse("sample_plan", new File("sample_plan.mps"));
+		MarmotScriptEngine engine = new MarmotScriptEngine(marmot);
+		engine.setVerbose(true);
 		
-		System.out.println(plan.toJson());
+		File file = new File("sample.mcs");
+		engine.evaluate(file);
 	}
 }

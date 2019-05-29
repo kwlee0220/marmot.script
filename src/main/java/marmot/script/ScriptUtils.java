@@ -2,7 +2,6 @@ package marmot.script;
 
 import java.util.Map;
 
-import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Envelope;
 
 import groovy.lang.Closure;
@@ -21,9 +20,7 @@ import marmot.plan.JdbcConnectOptions;
 import marmot.plan.LoadOptions;
 import marmot.plan.PredicateOptions;
 import marmot.plan.SpatialJoinOptions;
-import marmot.script.dslobj.OptionsParser;
 import marmot.script.plan.GPlanBuilder;
-import marmot.script.plan.GroupParser;
 import marmot.script.plan.JdbcConnectionParser;
 import marmot.support.DataUtils;
 import utils.Size2d;
@@ -64,7 +61,7 @@ public class ScriptUtils {
 		return script.call();
 	}
 	
-	public static Plan parsePlan(MarmotRuntime marmot, String planName, Closure script) {
+	public static Plan parsePlan(MarmotRuntime marmot, String planName, Closure<?> script) {
 		Utilities.checkNotNullArgument(script, "plan script closure is null");
 		
 		GPlanBuilder pbldr = new GPlanBuilder(marmot, planName);
@@ -83,7 +80,13 @@ public class ScriptUtils {
 	}
 	
 	public static Group parseGroup(Map<String,Object> args, String keys) {
-		return GroupParser.parse(keys, args);
+		Group group = Group.keyColumns(keys);
+		
+		ScriptUtils.getStringOption(args, "tags").ifPresent(group::tagColumns);
+		ScriptUtils.getStringOption(args, "orderBy").ifPresent(group::orderByColumns);
+		ScriptUtils.getIntOption(args, "workerCount").ifPresent(group::workerCount);
+		
+		return group;
 	}
 	
 	public static long parseByteLength(Object obj) {
@@ -232,17 +235,5 @@ public class ScriptUtils {
 	}
 	public static FOption<Boolean> getBooleanOption(Map<String,Object> args, String name) {
 		return FOption.ofNullable((Boolean)args.get(name));
-	}
-
-	
-	public static Map<String,Object> options(Map<String,Object> args, Closure decl) {
-		OptionsParser parser = new OptionsParser(args);
-		ScriptUtils.callClosure(decl, parser);
-		return parser.getArguments();
-	}
-	public static Map<String,Object> options(Closure decl) {
-		OptionsParser parser = new OptionsParser(Maps.newHashMap());
-		ScriptUtils.callClosure(decl, parser);
-		return parser.getArguments();
 	}
 }
