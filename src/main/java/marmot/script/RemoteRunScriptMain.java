@@ -1,6 +1,8 @@
 package marmot.script;
 
 import java.io.File;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 import io.vavr.CheckedConsumer;
 import marmot.MarmotRuntime;
@@ -18,11 +20,11 @@ import picocli.CommandLine.Parameters;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class RemoteRunCommandScriptMain implements CheckedConsumer<MarmotRuntime> {
+public class RemoteRunScriptMain implements CheckedConsumer<MarmotRuntime> {
 	@Mixin private MarmotConnector m_connector;
 	@Mixin private UsageHelp m_help;
 
-	@Parameters(paramLabel="path", index="0", arity="1..1",
+	@Parameters(paramLabel="path", index="0", arity="0..1",
 				description="plan file path to run")
 	private String m_scriptFile;
 	
@@ -33,7 +35,7 @@ public class RemoteRunCommandScriptMain implements CheckedConsumer<MarmotRuntime
 //		MarmotClientCommands.configureLog4j();
 		MarmotClientCommands.disableLog4j();
 		
-		RemoteRunCommandScriptMain cmd = new RemoteRunCommandScriptMain();
+		RemoteRunScriptMain cmd = new RemoteRunScriptMain();
 		CommandLine commandLine = new CommandLine(cmd);
 		
 		try {
@@ -63,7 +65,8 @@ public class RemoteRunCommandScriptMain implements CheckedConsumer<MarmotRuntime
 			scriptEngine.evaluate(new File(m_scriptFile));
 		}
 		else {
-			scriptEngine.evaluate(System.console().reader());
+			Reader reader = new InputStreamReader(System.in);
+			scriptEngine.evaluate(reader);
 		}
 	}
 }

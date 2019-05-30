@@ -29,7 +29,7 @@ import marmot.plan.LoadJdbcTableOptions;
 import marmot.plan.LoadOptions;
 import marmot.plan.PredicateOptions;
 import marmot.plan.SpatialJoinOptions;
-import marmot.script.DslScript;
+import marmot.script.DslScriptBase;
 import marmot.script.ScriptUtils;
 import marmot.script.dslobj.AggregateFunctionListParser;
 import marmot.script.dslobj.GDataSet;
@@ -39,14 +39,14 @@ import utils.func.FOption;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public abstract class PlanDslHandler extends DslScript {
-	private MarmotRuntime m_marmot;
+public abstract class PlanDslHandler extends DslScriptBase {
 	private PlanBuilder m_builder;
 	
 	public PlanDslHandler() { }
 	
 	protected PlanDslHandler(MarmotRuntime marmot, String name) {
-		m_marmot = marmot;
+		super(marmot);
+		
 		m_builder = new PlanBuilder(name);
 	}
 	
@@ -132,13 +132,10 @@ public abstract class PlanDslHandler extends DslScript {
 		return m_builder;
 	}
 	
-	public PlanBuilder expand(Map<String,Object> args, String colDecl, String updExpr) {
+	public PlanBuilder expand(String colDecl, RecordScript initScript) {
 		setupState();
 		
-		RecordScript script = ScriptUtils.getStringOption(args, "initializer")
-								.map(init -> RecordScript.of(updExpr, init))
-								.getOrElse(() -> RecordScript.of(updExpr));
-		m_builder.expand(colDecl, script);
+		m_builder.expand(colDecl, initScript);
 		return m_builder;
 	}
 	public PlanBuilder expand(String colDecl) {
@@ -148,10 +145,7 @@ public abstract class PlanDslHandler extends DslScript {
 		return m_builder;
 	}
 	public PlanBuilder expand(String colDecl, String updExpr) {
-		setupState();
-		
-		m_builder.expand(colDecl, updExpr);
-		return m_builder;
+		return expand(colDecl, RecordScript.of(updExpr));
 	}
 	
 	public PlanBuilder take(long count) {
@@ -597,10 +591,6 @@ public abstract class PlanDslHandler extends DslScript {
 	//
 	
 	private void setupState() {
-		if ( m_marmot == null ) {
-			MarmotRuntime marmot = (MarmotRuntime)getBinding().getProperty("MARMOT");
-			m_marmot = marmot;
-		}
 		if ( m_builder == null ) {
 			String planName = (String)getBinding().getProperty("MARMOT_PLAN_NAME");
 			m_builder = new PlanBuilder(planName);

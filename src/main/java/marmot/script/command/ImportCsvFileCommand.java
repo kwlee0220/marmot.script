@@ -8,13 +8,13 @@ import marmot.MarmotRuntime;
 import marmot.command.ImportParameters;
 import marmot.externio.csv.ImportCsv;
 import marmot.script.ScriptUtils;
-import marmot.script.dslobj.CsvOptionsParser;
+import marmot.script.dslobj.CsvParametersParser;
 
 /**
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class ImportCsvFileCommand extends CsvOptionsParser implements ScriptCommand<Long> {
+public class ImportCsvFileCommand extends CsvParametersParser implements ScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_csvPath;
 	private ImportParameters m_importParams = new ImportParameters();

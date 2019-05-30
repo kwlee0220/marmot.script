@@ -12,12 +12,12 @@ import marmot.script.GroovyDslClass;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class RunPlanToGeometry extends GroovyDslClass implements ScriptCommand<Geometry> {
+public class RunPlanToGeometryCommand extends GroovyDslClass implements ScriptCommand<Geometry> {
 	private final MarmotRuntime m_marmot;
 	private final Plan m_plan;
 	private final ExecutePlanOptions m_opts;
 	
-	public RunPlanToGeometry(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
+	public RunPlanToGeometryCommand(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
 		m_marmot = marmot;
 		m_plan = plan;
 		m_opts = opts;

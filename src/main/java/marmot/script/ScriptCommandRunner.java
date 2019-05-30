@@ -17,17 +17,18 @@ import marmot.script.command.ClusterDataSetCommand;
 import marmot.script.command.CreateDataSetCommand;
 import marmot.script.command.DeleteDataSetCommand;
 import marmot.script.command.ExecuteProcessCommand;
+import marmot.script.command.ExportDataSetAsCsvCommand;
 import marmot.script.command.ExportDataSetAsShapefileCommand;
 import marmot.script.command.ImportCsvFileCommand;
 import marmot.script.command.ImportExcelFileCommand;
 import marmot.script.command.ImportShapefileCommand;
 import marmot.script.command.MoveDataSetCommand;
 import marmot.script.command.RunPlanCommand;
-import marmot.script.command.RunPlanToGeometry;
-import marmot.script.command.RunPlanToLong;
-import marmot.script.command.RunPlanToRecord;
+import marmot.script.command.RunPlanToGeometryCommand;
+import marmot.script.command.RunPlanToLongCommand;
+import marmot.script.command.RunPlanToRecordCommand;
 import marmot.script.command.RunPlanToRecordSetCommand;
-import marmot.script.command.RunPlanToString;
+import marmot.script.command.RunPlanToStringCommand;
 import marmot.script.command.ScriptCommand;
 import utils.StopWatch;
 
@@ -36,7 +37,7 @@ import utils.StopWatch;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public abstract class CommandScriptHandler extends DslScript {
+public abstract class ScriptCommandRunner extends DslScriptBase {
 	private static final Map<String,Object> EMPTY_ARGS = Collections.unmodifiableMap(Maps.newHashMap());
 	
 	private Boolean m_verbose;
@@ -89,7 +90,7 @@ public abstract class CommandScriptHandler extends DslScript {
 	
 	public Record runPlanToRecord(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
-		RunPlanToRecord cmd = new RunPlanToRecord(getMarmotRuntime(), plan, opts);
+		RunPlanToRecordCommand cmd = new RunPlanToRecordCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
 	public Record runPlanToRecord(Plan plan) throws Exception {
@@ -98,7 +99,7 @@ public abstract class CommandScriptHandler extends DslScript {
 	
 	public Geometry runPlanToGeometry(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
-		RunPlanToGeometry cmd = new RunPlanToGeometry(getMarmotRuntime(), plan, opts);
+		RunPlanToGeometryCommand cmd = new RunPlanToGeometryCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
 	public Geometry runPlanToGeometry(Plan plan) throws Exception {
@@ -107,7 +108,7 @@ public abstract class CommandScriptHandler extends DslScript {
 	
 	public Long runPlanToLong(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
-		RunPlanToLong cmd = new RunPlanToLong(getMarmotRuntime(), plan, opts);
+		RunPlanToLongCommand cmd = new RunPlanToLongCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
 	public Long runPlanToLong(Plan plan) throws Exception {
@@ -116,7 +117,7 @@ public abstract class CommandScriptHandler extends DslScript {
 	
 	public String runPlanToString(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
-		RunPlanToString cmd = new RunPlanToString(getMarmotRuntime(), plan, opts);
+		RunPlanToStringCommand cmd = new RunPlanToStringCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
 	public String runPlanToString(Plan plan) throws Exception {
@@ -154,6 +155,26 @@ public abstract class CommandScriptHandler extends DslScript {
 	
 	public long importCsvFile(String csvPath, String dsId) throws Exception {
 		ImportCsvFileCommand cmd = new ImportCsvFileCommand(getMarmotRuntime(), csvPath, dsId);
+		return execute(cmd);
+	}
+	
+	public long exportDataSetAsCsv(Map<String,Object> args, String dsId,
+									String csvPath, Closure<?> optDecl)
+		throws Exception {
+		ExportDataSetAsCsvCommand cmd
+							= new ExportDataSetAsCsvCommand(getMarmotRuntime(), dsId, csvPath,
+															args, optDecl);
+		return execute(cmd);
+	}
+	public long exportDataSetAsCsv(Map<String,Object> args, String dsId,
+										String csvPath) throws Exception {
+		return exportDataSetToShapefile(args, dsId, csvPath, null);
+	}
+	public long exportDataSetAsCsv(String dsId, String csvPath, Closure<?> optDecl)
+		throws Exception {
+		ExportDataSetAsCsvCommand cmd
+						= new ExportDataSetAsCsvCommand(getMarmotRuntime(), dsId, csvPath,
+														EMPTY_ARGS, optDecl);
 		return execute(cmd);
 	}
 	

@@ -38,9 +38,9 @@ assignUid('id')
 sample(0.1)
 shard(10)
 
-aggregate({count=count(); total=sum('age'); avg=avg('age')})
+aggregate({count=COUNT(); total=SUM('age'); avg=AVG('age')})
 aggregateByGroup('kcol', tags: 'the_geom', workerCount: 17) {
-	count=count(); total=sum('age'); avg=avg('age')
+	count=COUNT(); total=SUM('age'); avg=AVG('age')
 }
 				
 takeByGroup('kcol', 10, orderBy: 'ocol3:A,ocol4:B')

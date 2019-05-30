@@ -35,44 +35,44 @@ public class AggregateFunctionListParser extends GroovyDslClass {
 		super.setProperty(name, value);
 	}
 	
-	public AggregateFunction count() {
+	public AggregateFunction COUNT() {
 		return AggregateFunction.COUNT();
 	}
 	
-	public AggregateFunction sum(String colName) {
+	public AggregateFunction SUM(String colName) {
 		return AggregateFunction.SUM(colName);
 	}
 	
-	public AggregateFunction max(String colName) {
+	public AggregateFunction MAX(String colName) {
 		return AggregateFunction.MAX(colName);
 	}
 	
-	public AggregateFunction min(String colName) {
+	public AggregateFunction MIN(String colName) {
 		return AggregateFunction.MIN(colName);
 	}
 	
-	public AggregateFunction avg(String colName) {
+	public AggregateFunction AVG(String colName) {
 		return AggregateFunction.AVG(colName);
 	}
 	
-	public AggregateFunction stddev(String colName) {
+	public AggregateFunction STDDEV(String colName) {
 		return AggregateFunction.STDDEV(colName);
 	}
 	
-	public AggregateFunction geom_union(String colName) {
+	public AggregateFunction GEOM_UNION(String colName) {
 		return AggregateFunction.GEOM_UNION(colName);
 	}
 	
 	// aggregation function
-	public AggregateFunction envelope(String colName) {
+	public AggregateFunction ENVELOPE(String colName) {
 		return AggregateFunction.ENVELOPE(colName);
 	}
 	
-	public AggregateFunction convex_hull(String colName) {
+	public AggregateFunction CONVEX_HULL(String colName) {
 		return AggregateFunction.CONVEX_HULL(colName);
 	}
 	
-	public AggregateFunction concat_str(String colName, String delim) {
+	public AggregateFunction CONCAT_STR(String colName, String delim) {
 		return AggregateFunction.CONCAT_STR(colName, delim);
 	}
 }

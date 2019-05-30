@@ -43,10 +43,14 @@ public class PlanScriptParser {
 		return ((PlanBuilder)new GroovyShell(m_binding, m_config).evaluate(script)).build();
 	}
 	
-	public Plan parse(String name, InputStream is) throws IOException {
+	public Plan parse(String name, Reader reader) throws IOException {
 		m_binding.setProperty("MARMOT_PLAN_NAME", name);
+		return ((PlanBuilder)new GroovyShell(m_binding, m_config).evaluate(reader)).build();
+	}
+	
+	public Plan parse(String name, InputStream is) throws IOException {
 		try ( Reader reader = new InputStreamReader(is) ) {
-			return ((PlanBuilder)new GroovyShell(m_binding, m_config).evaluate(reader)).build();
+			return parse(name, reader);
 		}
 	}
 }

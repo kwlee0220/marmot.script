@@ -11,8 +11,10 @@ import groovy.lang.Script;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordSchema;
+import marmot.RecordScript;
 import marmot.StoreDataSetOptions;
 import marmot.geo.GeoClientUtils;
+import marmot.optor.AggregateFunction;
 import marmot.optor.JoinType;
 import marmot.optor.geo.SpatialRelation;
 import marmot.optor.geo.SquareGrid;
@@ -25,10 +27,12 @@ import utils.func.FOption;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public abstract class DslScript extends Script {
-	private MarmotRuntime m_marmot;
+public abstract class DslScriptBase extends Script {
+	private volatile MarmotRuntime m_marmot;
 	
-	protected DslScript() {
+	protected DslScriptBase() { }
+	protected DslScriptBase(MarmotRuntime marmot) {
+		m_marmot = marmot;
 	}
 	
 	protected MarmotRuntime getMarmotRuntime() {
@@ -66,6 +70,10 @@ public abstract class DslScript extends Script {
 	
 	public RecordSchema RecordSchema(String decl) {
 		return RecordSchema.parse(decl);
+	}
+	
+	public RecordScript RecordScript(String init, String expr) {
+		return RecordScript.of(init, expr);
 	}
 	
 	public double distance(Object distExpr) {
@@ -119,6 +127,47 @@ public abstract class DslScript extends Script {
 		else {
 			throw new IllegalArgumentException("invalid square-grid bounds: " + bounds);
 		}
+	}
+	
+	public AggregateFunction count() {
+		return AggregateFunction.COUNT();
+	}
+	
+	public AggregateFunction SUM(String colName) {
+		return AggregateFunction.SUM(colName);
+	}
+	
+	public AggregateFunction MAX(String colName) {
+		return AggregateFunction.MAX(colName);
+	}
+	
+	public AggregateFunction MIN(String colName) {
+		return AggregateFunction.MIN(colName);
+	}
+	
+	public AggregateFunction AVG(String colName) {
+		return AggregateFunction.AVG(colName);
+	}
+	
+	public AggregateFunction STDDEV(String colName) {
+		return AggregateFunction.STDDEV(colName);
+	}
+	
+	public AggregateFunction GEOM_UNION(String colName) {
+		return AggregateFunction.GEOM_UNION(colName);
+	}
+	
+	// aggregation function
+	public AggregateFunction ENVELOPE(String colName) {
+		return AggregateFunction.ENVELOPE(colName);
+	}
+	
+	public AggregateFunction CONVEX_HULL(String colName) {
+		return AggregateFunction.CONVEX_HULL(colName);
+	}
+	
+	public AggregateFunction CONCAT_STR(String colName, String delim) {
+		return AggregateFunction.CONCAT_STR(colName, delim);
 	}
 	
 	public StoreDataSetOptions StoreDataSetOptions(Map<String,Object> args) {

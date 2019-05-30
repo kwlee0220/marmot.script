@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.net.URISyntaxException;
 
 import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -29,7 +30,11 @@ public class MarmotScriptEngine {
 		m_binding.setProperty("MARMOT_VERBOSE", false);
 		
 		m_config = new CompilerConfiguration();
-		m_config.setScriptBaseClass(CommandScriptHandler.class.getName());
+		m_config.setScriptBaseClass(ScriptCommandRunner.class.getName());
+		
+		ImportCustomizer customImports = new ImportCustomizer();
+		customImports.addImports("marmot.RecordScript");
+		m_config.addCompilationCustomizers(customImports);
 	}
 	
 	public MarmotScriptEngine setVerbose(boolean flag) {

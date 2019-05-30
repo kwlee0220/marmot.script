@@ -3,6 +3,7 @@ package marmot.script.command;
 import marmot.ExecutePlanOptions;
 import marmot.MarmotRuntime;
 import marmot.Plan;
+import marmot.Record;
 import marmot.script.GroovyDslClass;
 
 
@@ -10,20 +11,20 @@ import marmot.script.GroovyDslClass;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class RunPlanToLong extends GroovyDslClass implements ScriptCommand<Long> {
+public class RunPlanToRecordCommand extends GroovyDslClass implements ScriptCommand<Record> {
 	private final MarmotRuntime m_marmot;
 	private final Plan m_plan;
 	private final ExecutePlanOptions m_opts;
 	
-	public RunPlanToLong(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
+	public RunPlanToRecordCommand(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
 		m_marmot = marmot;
 		m_plan = plan;
 		m_opts = opts;
 	}
 
 	@Override
-	public Long execute() {
-		return m_marmot.executeToLong(m_plan, m_opts).getOrNull();
+	public Record execute() {
+		return m_marmot.executeToRecord(m_plan, m_opts).getOrNull();
 	}
 	
 	@Override

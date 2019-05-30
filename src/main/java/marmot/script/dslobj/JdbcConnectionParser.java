@@ -1,4 +1,4 @@
-package marmot.script.plan;
+package marmot.script.dslobj;
 
 import java.util.Map;
 

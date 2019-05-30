@@ -10,12 +10,12 @@ import marmot.script.GroovyDslClass;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class RunPlanToString extends GroovyDslClass implements ScriptCommand<String> {
+public class RunPlanToStringCommand extends GroovyDslClass implements ScriptCommand<String> {
 	private final MarmotRuntime m_marmot;
 	private final Plan m_plan;
 	private final ExecutePlanOptions m_opts;
 	
-	public RunPlanToString(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
+	public RunPlanToStringCommand(MarmotRuntime marmot, Plan plan, ExecutePlanOptions opts) {
 		m_marmot = marmot;
 		m_plan = plan;
 		m_opts = opts;
