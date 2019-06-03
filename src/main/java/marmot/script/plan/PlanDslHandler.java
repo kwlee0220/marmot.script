@@ -383,9 +383,10 @@ public abstract class PlanDslHandler extends DslScriptBase {
 
 	public PlanBuilder centroid(Map<String,Object> args, String geomCol) {
 		setupState();
-		
+
+		boolean inside = getBooleanOption(args, "inside").getOrElse(false);
 		GeomOpOptions opts = ScriptUtils.parseGeomOpOptions(args);
-		m_builder.centroid(geomCol, opts);
+		m_builder.centroid(geomCol, inside, opts);
 		return m_builder;
 	}
 	public PlanBuilder centroid(String geomCol) {
@@ -533,7 +534,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder clipJoin(String geomCol, String paramDsId) {
 		setupState();
 		
-		m_builder.clipJoin(geomCol, paramDsId);
+		m_builder.arcClip(geomCol, paramDsId);
 		return m_builder;
 	}
 	

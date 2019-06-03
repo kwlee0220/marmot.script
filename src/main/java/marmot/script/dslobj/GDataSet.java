@@ -108,6 +108,11 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
+	public DataSet updateGeometryColumnInfo(FOption<GeometryColumnInfo> gcInfo) {
+		return m_ds.updateGeometryColumnInfo(gcInfo);
+	}
+
+	@Override
 	public RecordSet read() {
 		return new GRecordSet(m_ds.read());
 	}

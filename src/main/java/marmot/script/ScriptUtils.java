@@ -80,10 +80,10 @@ public class ScriptUtils {
 	}
 	
 	public static Group parseGroup(Map<String,Object> args, String keys) {
-		Group group = Group.keyColumns(keys);
+		Group group = Group.ofKeys(keys);
 		
-		ScriptUtils.getStringOption(args, "tags").ifPresent(group::tagColumns);
-		ScriptUtils.getStringOption(args, "orderBy").ifPresent(group::orderByColumns);
+		ScriptUtils.getStringOption(args, "tags").ifPresent(group::tags);
+		ScriptUtils.getStringOption(args, "orderBy").ifPresent(group::orderBy);
 		ScriptUtils.getIntOption(args, "workerCount").ifPresent(group::workerCount);
 		
 		return group;
