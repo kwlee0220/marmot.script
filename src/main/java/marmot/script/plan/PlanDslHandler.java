@@ -362,7 +362,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 										.getOrElse(() -> JoinOptions.INNER_JOIN());
 		ScriptUtils.getIntOption(args, "workerCount").ifPresent(jopts::workerCount);
 		
-		m_builder.loadHashJoinFile(leftDsId, leftJoinCols, rightDsId, rightJoinCols, outJoinCols, jopts);
+		m_builder.loadHashJoin(leftDsId, leftJoinCols, rightDsId, rightJoinCols, outJoinCols, jopts);
 		return m_builder;
 	}
 
