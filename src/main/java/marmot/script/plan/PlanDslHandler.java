@@ -67,7 +67,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder loadTextFile(String... paths) {
 		setupState();
 		
-		m_builder.loadTextFile(Arrays.asList(paths), LoadOptions.create());
+		m_builder.loadTextFile(Arrays.asList(paths), LoadOptions.DEFAULT());
 		return m_builder;
 	}
 	public PlanBuilder loadTextFile(Map<String,Object> args, String... paths) {
@@ -233,7 +233,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 		setupState();
 		
 		Group group = ScriptUtils.parseGroup(args, keyCols);
-		m_builder.aggregateByGroup(group, aggrList.toArray(new AggregateFunction[0]));
+		m_builder.aggregateByGroup(group, aggrList);
 		return m_builder;
 	}
 	public PlanBuilder aggregateByGroup(String keyCols, List<AggregateFunction> aggrList) {
@@ -428,8 +428,9 @@ public abstract class PlanDslHandler extends DslScriptBase {
 										SpatialRelation rel, Object key) {
 		setupState();
 		
-		PredicateOptions opts = PredicateOptions.create();
-		ScriptUtils.getBooleanOption(args, "negated").ifPresent(opts::negated);
+		PredicateOptions opts = ScriptUtils.getBooleanOption(args, "negated")
+											.map(PredicateOptions::NEGATED)
+											.getOrElse(PredicateOptions.EMPTY);
 		
 		m_builder.filterSpatially(geomCol, rel, Geometry(key), opts);
 		return m_builder;

@@ -120,14 +120,13 @@ public class ScriptUtils {
 	}
 	
 	public static PredicateOptions parsePredicateOptions(Map<String,Object> args) {
-		PredicateOptions opts = PredicateOptions.create();
-		ScriptUtils.getBooleanOption(args, "negated").ifPresent(opts::negated);
-		
-		return opts;
+		return ScriptUtils.getBooleanOption(args, "negated")
+						.map(PredicateOptions::NEGATED)
+						.getOrElse(PredicateOptions.EMPTY);
 	}
 	
 	public static LoadOptions parseLoadOptions(Map<String,Object> args) {
-		LoadOptions opts = LoadOptions.create();
+		LoadOptions opts = LoadOptions.DEFAULT();
 		getIntOption(args, "splitCount").ifPresent(opts::splitCount);
 		
 		return opts;
@@ -194,20 +193,31 @@ public class ScriptUtils {
 	}
 	
 	public static GeomOpOptions parseGeomOpOptions(Map<String,Object> args) {
-		GeomOpOptions opts = GeomOpOptions.create();
+		GeomOpOptions opts = GeomOpOptions.EMPTY;
 		
-		getStringOption(args, "output").ifPresent(opts::outputColumn);
-		getBooleanOption(args, "throwOpError").ifPresent(opts::throwOpError);
+		opts = getStringOption(args, "output").transform(opts, (op,o) -> op.outputColumn(o));
+		opts = getBooleanOption(args, "throwOpError").transform(opts, (op,o) -> op.throwOpError(o));
 		
 		return opts;
 	}
 	
 	public static SpatialJoinOptions parseSpatialJoinOptions(Map<String,Object> args) {
-		SpatialJoinOptions opts = SpatialJoinOptions.create();
-				
-		getOption(args, "joinExpr").cast(SpatialRelation.class).ifPresent(opts::joinExpr);
-		getBooleanOption(args, "negated").ifPresent(opts::negated);
-		getStringOption(args, "output").ifPresent(opts::outputColumns);
+		SpatialJoinOptions opts = SpatialJoinOptions.EMPTY;
+		
+		Object value;
+		
+		value = args.get("joinExpr");
+		if ( value != null ) {
+			opts = opts.joinExpr(((SpatialRelation)value));
+		}
+		value = args.get("negated");
+		if ( value != null ) {
+			opts = opts.negated(((Boolean)value));
+		}
+		value = args.get("output");
+		if ( value != null ) {
+			opts = opts.outputColumns(((String)value));
+		}
 		
 		return opts;
 	}
