@@ -6,14 +6,12 @@ import com.vividsolutions.jts.geom.Envelope;
 
 import groovy.lang.Closure;
 import marmot.ExecutePlanOptions;
-import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordScript;
 import marmot.StoreDataSetOptions;
 import marmot.optor.CsvOptions;
 import marmot.optor.ParseCsvOptions;
-import marmot.optor.geo.SpatialRelation;
 import marmot.plan.GeomOpOptions;
 import marmot.plan.Group;
 import marmot.plan.JdbcConnectOptions;
@@ -21,6 +19,7 @@ import marmot.plan.LoadOptions;
 import marmot.plan.PredicateOptions;
 import marmot.plan.SpatialJoinOptions;
 import marmot.script.dslobj.JdbcConnectionParser;
+import marmot.script.dslobj.StoreDataSetOptionsParser;
 import marmot.script.plan.GPlanBuilder;
 import marmot.support.DataUtils;
 import utils.Size2d;
@@ -102,11 +101,10 @@ public class ScriptUtils {
 	}
 	
 	public static JdbcConnectOptions parseJdbcConnectOptions(Map<String,Object> args) {
-		return JdbcConnectOptions.create()
-								.jdbcUrl(ScriptUtils.getOrThrow(args, "url"))
-								.user(ScriptUtils.getOrThrow(args, "user"))
-								.passwd(ScriptUtils.getOrThrow(args, "passwd"))
-								.driverClassName(ScriptUtils.getOrThrow(args, "driverClass"));
+		return new JdbcConnectOptions(getOrThrow(args, "url").toString(),
+										getOrThrow(args, "user").toString(),
+										getOrThrow(args, "passwd").toString(),
+										getOrThrow(args, "driverClass").toString());
 	}
 	public static JdbcConnectOptions parseJdbcConnectOptions(Closure decl) {
 		JdbcConnectionParser parser = new JdbcConnectionParser();
@@ -122,81 +120,60 @@ public class ScriptUtils {
 	public static PredicateOptions parsePredicateOptions(Map<String,Object> args) {
 		return ScriptUtils.getBooleanOption(args, "negated")
 						.map(PredicateOptions::NEGATED)
-						.getOrElse(PredicateOptions.EMPTY);
+						.getOrElse(PredicateOptions.DEFAULT);
 	}
 	
 	public static LoadOptions parseLoadOptions(Map<String,Object> args) {
-		LoadOptions opts = LoadOptions.DEFAULT();
-		getIntOption(args, "splitCount").ifPresent(opts::splitCount);
+		LoadOptions opts = LoadOptions.DEFAULT;
+		opts = getIntOption(args, "splitCount").transform(opts, LoadOptions::splitCount);
 		
 		return opts;
 	}
 	
 	public static StoreDataSetOptions parseStoreDataSetOptions(Map<String,Object> args) {
-		StoreDataSetOptions opts = StoreDataSetOptions.create();
-		
-		FOption<Boolean> force = getOption(args, "force");
-		force.ifPresent(opts::force);
-		
-		FOption<Object> gcInfo = getOption(args, "geometry");
-		gcInfo.ifPresent(info -> {
-			if ( info instanceof String ) {
-				opts.geometryColumnInfo(GeometryColumnInfo.fromString((String)info));
-			}
-			else if ( info instanceof GeometryColumnInfo ) {
-				opts.geometryColumnInfo((GeometryColumnInfo)info);
-			}
-			else {
-				throw new IllegalArgumentException("incorrect GeometryColumnInfo: " + info);
-			}
-		});
-		
-		return opts;
+		return StoreDataSetOptionsParser.parse(args);
 	}
 	
 	public static ExecutePlanOptions parseExecutePlanOptions(Map<String,Object> args) {
-		ExecutePlanOptions opts = ExecutePlanOptions.create();
-		ScriptUtils.getBooleanOption(args, "disableLocalExec")
-					.ifPresent(opts::disableLocalExecution);
-		ScriptUtils.getStringOption(args, "mapOutputCompressionCodec")
-					.ifPresent(opts::mapOutputCompressionCodec);
+		ExecutePlanOptions opts = ExecutePlanOptions.DEFAULT;
+		opts = getBooleanOption(args, "disableLocalExec").transform(opts, ExecutePlanOptions::disableLocalExecution);
+		opts = getStringOption(args, "mapOutputCompressionCodec").transform(opts, ExecutePlanOptions::mapOutputCompressionCodec);
 		
 		return opts;
 	}
 	
 	public static CsvOptions parseCsvOptions(Map<String,Object> args) {
-		CsvOptions opts = CsvOptions.create();
-		
-		getStringOption(args, "delim").map(s -> s.charAt(0)).ifPresent(opts::delimiter);
-		getStringOption(args, "quote").map(s -> s.charAt(0)).ifPresent(opts::quote);
-		getStringOption(args, "escape").map(s -> s.charAt(0)).ifPresent(opts::escape);
-		getStringOption(args, "charset").ifPresent(opts::charset);
+		CsvOptions opts = getCharOption(args, "delim").map(CsvOptions::DEFAULT)
+							.getOrElse(CsvOptions::DEFAULT);
+		opts = getCharOption(args, "quote").transform(opts, CsvOptions::quote);
+		opts = getCharOption(args, "escape").transform(opts, CsvOptions::escape);
+		opts = getStringOption(args, "charset").transform(opts, CsvOptions::charset);
 		
 		return opts;
 	}
 	
 	public static ParseCsvOptions parseParseCsvOptions(Map<String,Object> args) {
-		ParseCsvOptions opts = ParseCsvOptions.create();
+		ParseCsvOptions opts = ParseCsvOptions.DEFAULT();
 		
-		getStringOption(args, "delim").map(s -> s.charAt(0)).ifPresent(opts::delimiter);
-		getStringOption(args, "quote").map(s -> s.charAt(0)).ifPresent(opts::quote);
-		getStringOption(args, "escape").map(s -> s.charAt(0)).ifPresent(opts::escape);
-		getStringOption(args, "charset").ifPresent(opts::charset);
-		getStringOption(args, "header").ifPresent(opts::header);
-		getBooleanOption(args, "headerFirst").ifPresent(opts::headerFirst);
-		getBooleanOption(args, "trimColumns").ifPresent(opts::trimColumns);
-		getStringOption(args, "nullValue").ifPresent(opts::nullValue);
-		getIntOption(args, "maxColumnLength").ifPresent(opts::maxColumnLength);
-		getBooleanOption(args, "throwParseError").ifPresent(opts::throwParseError);
+		opts = getCharOption(args, "delim").transform(opts, ParseCsvOptions::delimiter);
+		opts = getCharOption(args, "quote").transform(opts, ParseCsvOptions::quote);
+		opts = getCharOption(args, "escape").transform(opts, ParseCsvOptions::escape);
+		opts = getStringOption(args, "charset").transform(opts, ParseCsvOptions::charset);
+		opts = getStringOption(args, "header").transform(opts, ParseCsvOptions::header);
+		opts = getBooleanOption(args, "headerFirst").transform(opts, ParseCsvOptions::headerFirst);
+		opts = getBooleanOption(args, "trimColumns").transform(opts, ParseCsvOptions::trimColumns);
+		opts = getStringOption(args, "nullValue").transform(opts, ParseCsvOptions::nullValue);
+		opts = getIntOption(args, "maxColumnLength").transform(opts, ParseCsvOptions::maxColumnLength);
+		opts = getBooleanOption(args, "throwParseError").transform(opts, ParseCsvOptions::throwParseError);
 		
 		return opts;
 	}
 	
 	public static GeomOpOptions parseGeomOpOptions(Map<String,Object> args) {
-		GeomOpOptions opts = GeomOpOptions.EMPTY;
+		GeomOpOptions opts = GeomOpOptions.DEFAULT;
 		
-		opts = getStringOption(args, "output").transform(opts, (op,o) -> op.outputColumn(o));
-		opts = getBooleanOption(args, "throwOpError").transform(opts, (op,o) -> op.throwOpError(o));
+		opts = getStringOption(args, "output").transform(opts, GeomOpOptions::outputColumn);
+		opts = getBooleanOption(args, "throwOpError").transform(opts, GeomOpOptions::throwOpError);
 		
 		return opts;
 	}
@@ -204,20 +181,9 @@ public class ScriptUtils {
 	public static SpatialJoinOptions parseSpatialJoinOptions(Map<String,Object> args) {
 		SpatialJoinOptions opts = SpatialJoinOptions.EMPTY;
 		
-		Object value;
-		
-		value = args.get("joinExpr");
-		if ( value != null ) {
-			opts = opts.joinExpr(((SpatialRelation)value));
-		}
-		value = args.get("negated");
-		if ( value != null ) {
-			opts = opts.negated(((Boolean)value));
-		}
-		value = args.get("output");
-		if ( value != null ) {
-			opts = opts.outputColumns(((String)value));
-		}
+		opts = getStringOption(args, "joinExpr").transform(opts, SpatialJoinOptions::joinExpr);
+		opts = getBooleanOption(args, "negated").transform(opts, SpatialJoinOptions::negated);
+		opts = getStringOption(args, "output").transform(opts, SpatialJoinOptions::outputColumns);
 		
 		return opts;
 	}
@@ -242,6 +208,9 @@ public class ScriptUtils {
 	}
 	public static FOption<String> getStringOption(Map<String,Object> args, String name) {
 		return FOption.ofNullable((String)args.get(name));
+	}
+	public static FOption<Character> getCharOption(Map<String,Object> args, String name) {
+		return FOption.ofNullable((String)args.get(name)).map(s -> s.charAt(0));
 	}
 	public static FOption<Boolean> getBooleanOption(Map<String,Object> args, String name) {
 		return FOption.ofNullable((Boolean)args.get(name));

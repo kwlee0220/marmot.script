@@ -1,5 +1,10 @@
 package marmot.script.plan;
 
+import static marmot.script.ScriptUtils.parseGroup;
+import static marmot.script.ScriptUtils.parseLoadOptions;
+import static marmot.script.ScriptUtils.parseRecordScript;
+import static marmot.script.ScriptUtils.parseStoreDataSetOptions;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +62,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder load(Map<String,Object> args, String dsId) {
 		setupState();
 		
-		m_builder.load(dsId, ScriptUtils.parseLoadOptions(args));
+		m_builder.load(dsId, parseLoadOptions(args));
 		return m_builder;
 	}
 	public PlanBuilder load(String dsId) {
@@ -67,20 +72,20 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder loadTextFile(String... paths) {
 		setupState();
 		
-		m_builder.loadTextFile(Arrays.asList(paths), LoadOptions.DEFAULT());
+		m_builder.loadTextFile(Arrays.asList(paths), LoadOptions.DEFAULT);
 		return m_builder;
 	}
 	public PlanBuilder loadTextFile(Map<String,Object> args, String... paths) {
 		setupState();
 		
-		m_builder.loadTextFile(Arrays.asList(paths), ScriptUtils.parseLoadOptions(args));
+		m_builder.loadTextFile(Arrays.asList(paths), parseLoadOptions(args));
 		return m_builder;
 	}
 
 	public PlanBuilder filter(Map<String,Object> args, String pred) {
 		setupState();
 		
-		m_builder.filter(ScriptUtils.parseRecordScript(args, pred));
+		m_builder.filter(parseRecordScript(args, pred));
 		return m_builder;
 	}
 	public PlanBuilder filter(String pred) {
@@ -100,7 +105,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder defineColumn(Map<String,Object> args, String colDecl, String initValue) {
 		setupState();
 		
-		RecordScript script = ScriptUtils.getStringOption(args, "initializer")
+		RecordScript script = getStringOption(args, "initializer")
 								.map(init -> RecordScript.of(initValue, init))
 								.getOrElse(() -> RecordScript.of(initValue));
 		m_builder.defineColumn(colDecl, script);
@@ -122,7 +127,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder update(Map<String,Object> args, String expr) {
 		setupState();
 		
-		m_builder.update(ScriptUtils.parseRecordScript(args, expr));
+		m_builder.update(parseRecordScript(args, expr));
 		return m_builder;
 	}
 	public PlanBuilder update(String expr) {
@@ -193,7 +198,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder distinct(Map<String,Object> args, String keyCols) {
 		setupState();
 		
-		ScriptUtils.getIntOption(args, "workerCount")
+		getIntOption(args, "workerCount")
 					.ifPresent(cnt -> m_builder.distinct(keyCols, cnt))
 					.ifAbsent(() -> m_builder.distinct(keyCols));
 		return m_builder;
@@ -217,7 +222,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 										Closure<?> aggrsDecl) {
 		setupState();
 		
-		Group group = ScriptUtils.parseGroup(args, keyCols);
+		Group group = parseGroup(args, keyCols);
 		List<AggregateFunction> aggrs = new AggregateFunctionListParser().parse(aggrsDecl);
 		m_builder.aggregateByGroup(group, aggrs.toArray(new AggregateFunction[0]));
 		return m_builder;
@@ -232,7 +237,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 										List<AggregateFunction> aggrList) {
 		setupState();
 		
-		Group group = ScriptUtils.parseGroup(args, keyCols);
+		Group group = parseGroup(args, keyCols);
 		m_builder.aggregateByGroup(group, aggrList);
 		return m_builder;
 	}
@@ -243,7 +248,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder takeByGroup(Map<String,Object> args, String keyCols, int count) {
 		setupState();
 		
-		Group group = ScriptUtils.parseGroup(args, keyCols);
+		Group group = parseGroup(args, keyCols);
 		m_builder.takeByGroup(group, count);
 		return m_builder;
 	}
@@ -256,7 +261,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder listByGroup(Map<String,Object> args, String keyCols) {
 		setupState();
 		
-		Group group = ScriptUtils.parseGroup(args, keyCols);
+		Group group = parseGroup(args, keyCols);
 		m_builder.listByGroup(group);
 		return m_builder;
 	}
@@ -267,8 +272,8 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder storeByGroup(Map<String,Object> args, String keyCols, String rootPath) {
 		setupState();
 		
-		Group group = ScriptUtils.parseGroup(args, keyCols);
-		StoreDataSetOptions opts = ScriptUtils.parseStoreDataSetOptions(args);
+		Group group = parseGroup(args, keyCols);
+		StoreDataSetOptions opts = parseStoreDataSetOptions(args);
 		m_builder.storeByGroup(group, rootPath, opts);
 		return m_builder;
 	}
@@ -306,13 +311,13 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder storeAsCsv(Map<String,Object> args, String path) {
 		setupState();
 		
-		StoreAsCsvOptions opts = StoreAsCsvOptions.create();
-		ScriptUtils.getStringOption(args, "delim").map(s -> s.charAt(0)).ifPresent(opts::delimiter);
-		ScriptUtils.getStringOption(args, "quote").map(s -> s.charAt(0)).ifPresent(opts::quote);
-		ScriptUtils.getStringOption(args, "escape").map(s -> s.charAt(0)).ifPresent(opts::escape);
-		ScriptUtils.getStringOption(args, "charset").ifPresent(opts::charset);
-		ScriptUtils.getBooleanOption(args, "headerFirst").ifPresent(opts::headerFirst);
-		ScriptUtils.getLongOption(args, "blockSize").ifPresent(opts::blockSize);
+		StoreAsCsvOptions opts = StoreAsCsvOptions.DEFAULT();
+		opts = getCharOption(args, "delim").transform(opts, StoreAsCsvOptions::delimiter);
+		opts = getCharOption(args, "quote").transform(opts, StoreAsCsvOptions::quote);
+		opts = getCharOption(args, "escape").transform(opts, StoreAsCsvOptions::escape);
+		opts = getStringOption(args, "charset").transform(opts, StoreAsCsvOptions::charset);
+		opts = getBooleanOption(args, "headerFirst").transform(opts, StoreAsCsvOptions::headerFirst);
+		opts = getLongOption(args, "blockSize").transform(opts, StoreAsCsvOptions::blockSize);
 		
 		m_builder.storeAsCsv(path, opts);
 		return m_builder;
@@ -335,8 +340,8 @@ public abstract class PlanDslHandler extends DslScriptBase {
 												return JoinType.fromString(o.toString());
 											}
 										})
-										.map(t -> new JoinOptions().joinType(t))
-										.getOrElse(() -> JoinOptions.INNER_JOIN());
+										.map(JoinOptions::create)
+										.getOrElse(() -> JoinOptions.INNER_JOIN);
 		ScriptUtils.getIntOption(args, "workerCount").ifPresent(jopts::workerCount);
 		
 		m_builder.hashJoin(inputJoinCols, paramDataSet, paramJoinCols, outJoinCols, jopts);
@@ -358,8 +363,8 @@ public abstract class PlanDslHandler extends DslScriptBase {
 												return JoinType.fromString(o.toString());
 											}
 										})
-										.map(t -> new JoinOptions().joinType(t))
-										.getOrElse(() -> JoinOptions.INNER_JOIN());
+										.map(JoinOptions::create)
+										.getOrElse(() -> JoinOptions.INNER_JOIN);
 		ScriptUtils.getIntOption(args, "workerCount").ifPresent(jopts::workerCount);
 		
 		m_builder.loadHashJoin(leftDsId, leftJoinCols, rightDsId, rightJoinCols, outJoinCols, jopts);
@@ -430,7 +435,7 @@ public abstract class PlanDslHandler extends DslScriptBase {
 		
 		PredicateOptions opts = ScriptUtils.getBooleanOption(args, "negated")
 											.map(PredicateOptions::NEGATED)
-											.getOrElse(PredicateOptions.EMPTY);
+											.getOrElse(PredicateOptions.DEFAULT);
 		
 		m_builder.filterSpatially(geomCol, rel, Geometry(key), opts);
 		return m_builder;
@@ -568,9 +573,9 @@ public abstract class PlanDslHandler extends DslScriptBase {
 										JdbcConnectOptions jdbcOpts) {
 		setupState();
 		
-		LoadJdbcTableOptions opts = LoadJdbcTableOptions.create();
-		ScriptUtils.getStringOption(args, "selectExpr").ifPresent(opts::selectExpr);
-		ScriptUtils.getIntOption(args, "mapperCount").ifPresent(opts::mapperCount);
+		LoadJdbcTableOptions opts = LoadJdbcTableOptions.DEFAULT();
+		opts = getStringOption(args, "selectExpr").transform(opts, LoadJdbcTableOptions::selectExpr);
+		opts = getIntOption(args, "mapperCount").transform(opts, LoadJdbcTableOptions::mapperCount);
 		
 		m_builder.loadJdbcTable(tblName, jdbcOpts, opts);
 		return m_builder;

@@ -19,7 +19,7 @@ public class ExecuteProcessCommand extends GroovyDslClass
 	public ExecuteProcessCommand(MarmotRuntime marmot, String procName, Map<String,Object> params) {
 		m_marmot = marmot;
 		m_procName = procName;
-		m_params = KVFStream.of(params).mapValue(v -> v.toString()).toMap();
+		m_params = KVFStream.from(params).mapValue(v -> v.toString()).toMap();
 	}
 
 	@Override

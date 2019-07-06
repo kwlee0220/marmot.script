@@ -184,6 +184,9 @@ public abstract class DslScriptBase extends Script {
 	protected FOption<String> getStringOption(Map<String,Object> args, String key) {
 		return FOption.ofNullable((String)args.get(key));
 	}
+	protected FOption<Character> getCharOption(Map<String,Object> args, String key) {
+		return FOption.ofNullable((String)args.get(key)).map(s -> s.charAt(0));
+	}
 	protected FOption<Integer> getIntOption(Map<String,Object> args, String name) {
 		return FOption.ofNullable((Integer)args.get(name));
 	}

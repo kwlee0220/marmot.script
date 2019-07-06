@@ -21,7 +21,7 @@ public class CreateDataSetCommand extends GroovyDslClass
 									implements ScriptCommand<DataSet> {
 	private final MarmotRuntime m_marmot;
 	private final String m_dsId;
-	private final StoreDataSetOptions m_options;
+	private StoreDataSetOptions m_options;
 	private RecordSchema m_schema;
 	private Plan m_plan;
 	
@@ -42,7 +42,7 @@ public class CreateDataSetCommand extends GroovyDslClass
 	public Object getProperty(String name) {
 		switch ( name ) {
 			case "force":
-				m_options.force(true);
+				m_options = m_options.force(true);
 				return this;
 			case "plan":
 			case "multi_polygon":
@@ -57,7 +57,7 @@ public class CreateDataSetCommand extends GroovyDslClass
 		switch ( name ) {
 			case "force":
 				if ( (boolean)value ) {
-					m_options.force(true);
+					m_options = m_options.force(true);
 				}
 				return;
 		}
@@ -67,7 +67,7 @@ public class CreateDataSetCommand extends GroovyDslClass
 	
 	public CreateDataSetCommand geometry(String str) {
 		GeometryColumnInfo gcInfo = GeometryColumnInfo.fromString(str);
-		m_options.geometryColumnInfo(gcInfo);
+		m_options = m_options.geometryColumnInfo(gcInfo);
 		
 		return this;
 	}
