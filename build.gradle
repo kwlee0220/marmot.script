@@ -84,11 +84,6 @@ apply plugin: 'eclipse'
 eclipse {
 	classpath {
 		file {
-			withXml {
-				def node = it.asNode()
-				node.appendNode('classpathentry', [kind: 'output', path: 'classes'])
-			}
-			
 			whenMerged { cp ->
 				Map entryByPath = cp.entries.groupBy { entry -> entry.path }
 				entryByPath.each { key, values ->
