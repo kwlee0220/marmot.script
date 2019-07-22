@@ -1,15 +1,12 @@
 package marmot.script.dslobj;
 
 import static marmot.script.ScriptUtils.getBooleanOption;
-import static marmot.script.ScriptUtils.getOption;
 import static marmot.script.ScriptUtils.getStringOption;
 
 import java.util.Map;
 
 import groovy.lang.GroovyObjectSupport;
 import marmot.externio.csv.CsvParameters;
-import marmot.support.DataUtils;
-import utils.UnitUtils;
 
 /**
  * 
@@ -32,7 +29,6 @@ public class CsvParametersParser extends GroovyObjectSupport {
 		getStringOption(args, "srid").ifPresent(parser::srid);
 		getBooleanOption(args, "trimColumns").ifPresent(parser::trimColumns);
 		getStringOption(args, "nullValue").ifPresent(parser::nullValue);
-		getOption(args, "maxColumnLength").ifPresent(parser::maxColumnLength);
 		
 		return parser;
 	}
@@ -115,21 +111,6 @@ public class CsvParametersParser extends GroovyObjectSupport {
 	
 	public CsvParametersParser nullValue(String str) {
 		m_options.nullValue(str);
-		return this;
-	}
-	
-	public CsvParametersParser maxColumnLength(Object obj) {
-		int length;
-		if ( obj instanceof String ) {
-			length = (int)UnitUtils.parseByteSize((String)obj);
-		}
-		else if ( obj instanceof Number ) {
-			length = DataUtils.asInt(obj);
-		}
-		else {
-			throw new IllegalArgumentException("invalid length object: " + obj);
-		}
-		m_options.maxColumnLength(length);
 		return this;
 	}
 }
