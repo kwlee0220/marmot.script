@@ -426,7 +426,19 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder filterSpatially(String geomCol, SpatialRelation rel, Object key) {
 		setupState();
 		
-		m_builder.filterSpatially(geomCol, rel, Geometry(key));
+		if ( key instanceof Envelope ) {
+			m_builder.filterSpatially(geomCol, rel, (Envelope)key);
+		}
+		else if ( key instanceof String ) {
+			m_builder.filterSpatially(geomCol, rel, (String)key);
+		}
+		else if ( key instanceof Geometry ) {
+			m_builder.filterSpatially(geomCol, rel, (Geometry)key);
+		}
+		else {
+			throw new IllegalArgumentException("invalid key object: " + key);
+		}
+		
 		return m_builder;
 	}
 	public PlanBuilder filterSpatially(Map<String,Object> args, String geomCol,
@@ -436,8 +448,20 @@ public abstract class PlanDslHandler extends DslScriptBase {
 		PredicateOptions opts = ScriptUtils.getBooleanOption(args, "negated")
 											.map(PredicateOptions::NEGATED)
 											.getOrElse(PredicateOptions.DEFAULT);
+
+		if ( key instanceof Envelope ) {
+			m_builder.filterSpatially(geomCol, rel, (Envelope)key);
+		}
+		else if ( key instanceof String ) {
+			m_builder.filterSpatially(geomCol, rel, (String)key);
+		}
+		else if ( key instanceof Geometry ) {
+			m_builder.filterSpatially(geomCol, rel, (Geometry)key);
+		}
+		else {
+			throw new IllegalArgumentException("invalid key object: " + key);
+		}
 		
-		m_builder.filterSpatially(geomCol, rel, Geometry(key), opts);
 		return m_builder;
 	}
 

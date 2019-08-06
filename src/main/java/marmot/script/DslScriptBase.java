@@ -100,6 +100,18 @@ public abstract class DslScriptBase extends Script {
 		return ScriptUtils.parseEnvelope(coords);
 	}
 	
+	public Envelope Envelope(Object obj) {
+		if ( obj instanceof Envelope ) {
+			return (Envelope)obj;
+		}
+		else if ( obj instanceof Geometry ) {
+			return ((Geometry)obj).getEnvelopeInternal();
+		}
+		else {
+			throw new IllegalArgumentException("not Envelope object: " + obj);
+		}
+	}
+	
 	public Geometry WKT(String wktStr) throws ParseException {
 		return GeoClientUtils.fromWKT(wktStr);
 	}
