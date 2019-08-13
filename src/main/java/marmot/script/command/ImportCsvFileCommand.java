@@ -57,8 +57,8 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 		return this;
 	}
 	
-	public ImportCsvFileCommand compression(boolean flag) {
-		m_importParams.setCompression(flag);
+	public ImportCsvFileCommand compressionCodecName(String codecName) {
+		m_importParams.setCompressionCodecName(codecName);
 		return this;
 	}
 	

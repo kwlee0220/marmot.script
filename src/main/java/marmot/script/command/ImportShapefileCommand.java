@@ -36,7 +36,7 @@ public class ImportShapefileCommand extends GroovyDslClass
 													.ifPresent(m_importParams::setGeometryColumnInfo);
 		ScriptUtils.getBooleanOption(args, "force").ifPresent(m_importParams::setForce);
 		ScriptUtils.getBooleanOption(args, "append").ifPresent(m_importParams::setAppend);
-		ScriptUtils.getBooleanOption(args, "compression").ifPresent(m_importParams::setCompression);
+		ScriptUtils.getStringOption(args, "compression").ifPresent(m_importParams::setCompressionCodecName);
 		ScriptUtils.getOption(args, "blockSize")
 					.map(ScriptUtils::parseByteLength).ifPresent(m_importParams::setBlockSize);
 		ScriptUtils.getIntOption(args, "reportInterval").ifPresent(m_importParams::setReportInterval);
@@ -71,8 +71,8 @@ public class ImportShapefileCommand extends GroovyDslClass
 		return this;
 	}
 	
-	public ImportShapefileCommand compression(boolean flag) {
-		m_importParams.setCompression(flag);
+	public ImportShapefileCommand compressionCodecName(String codecName) {
+		m_importParams.setCompressionCodecName(codecName);
 		return this;
 	}
 	

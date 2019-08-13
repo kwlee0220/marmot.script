@@ -53,8 +53,8 @@ public class StoreDataSetOptionsParser extends GroovyObjectSupport {
 		return this;
 	}
 	
-	public StoreDataSetOptionsParser compression(boolean flag) {
-		m_options = m_options.compression(flag);
+	public StoreDataSetOptionsParser compressionCodecName(String codecName) {
+		m_options = m_options.compressionCodecName(codecName);
 		return this;
 	}
 	

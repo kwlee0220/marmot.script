@@ -38,7 +38,7 @@ public class ImportExcelFileCommand extends GroovyDslClass
 													.ifPresent(m_importParams::setGeometryColumnInfo);
 		ScriptUtils.getBooleanOption(args, "force").ifPresent(m_importParams::setForce);
 		ScriptUtils.getBooleanOption(args, "append").ifPresent(m_importParams::setAppend);
-		ScriptUtils.getBooleanOption(args, "compression").ifPresent(m_importParams::setCompression);
+		ScriptUtils.getStringOption(args, "compression").ifPresent(m_importParams::setCompressionCodecName);
 		ScriptUtils.getOption(args, "blockSize")
 					.map(ScriptUtils::parseByteLength).ifPresent(m_importParams::setBlockSize);
 		ScriptUtils.getIntOption(args, "reportInterval").ifPresent(m_importParams::setReportInterval);
@@ -83,8 +83,8 @@ public class ImportExcelFileCommand extends GroovyDslClass
 		return this;
 	}
 	
-	public ImportExcelFileCommand compression(boolean flag) {
-		m_importParams.setCompression(flag);
+	public ImportExcelFileCommand compressionCodecName(String codecName) {
+		m_importParams.setCompressionCodecName(codecName);
 		return this;
 	}
 	

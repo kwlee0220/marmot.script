@@ -93,8 +93,8 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public boolean isCompressed() {
-		return m_ds.isCompressed();
+	public FOption<String> getCompressionCodecName() {
+		return m_ds.getCompressionCodecName();
 	}
 
 	@Override
