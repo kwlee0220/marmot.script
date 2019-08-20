@@ -163,7 +163,6 @@ public class ScriptUtils {
 		opts = getBooleanOption(args, "headerFirst").transform(opts, ParseCsvOptions::headerFirst);
 		opts = getBooleanOption(args, "trimColumns").transform(opts, ParseCsvOptions::trimColumns);
 		opts = getStringOption(args, "nullValue").transform(opts, ParseCsvOptions::nullValue);
-		opts = getIntOption(args, "maxColumnLength").transform(opts, ParseCsvOptions::maxColumnLength);
 		opts = getBooleanOption(args, "throwParseError").transform(opts, ParseCsvOptions::throwParseError);
 		
 		return opts;

@@ -14,14 +14,15 @@ import marmot.script.ScriptUtils;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class AppendIntoDataSetCommand extends GroovyDslClass
-									implements ScriptCommand<DataSet> {
+public class AppendRecordSetIntoDataSetCommand extends GroovyDslClass
+												implements ScriptCommand<DataSet> {
 	private final MarmotRuntime m_marmot;
 	private final String m_dsId;
 	private final ExecutePlanOptions m_options;
 	private Plan m_plan;
 	
-	public AppendIntoDataSetCommand(MarmotRuntime marmot, String dsId, Map<String,Object> args) {
+	public AppendRecordSetIntoDataSetCommand(MarmotRuntime marmot, String dsId,
+											Map<String,Object> args) {
 		m_marmot = marmot;
 		m_dsId = dsId;
 		
@@ -62,7 +63,10 @@ public class AppendIntoDataSetCommand extends GroovyDslClass
 	@Override
 	public DataSet execute() {
 		if ( m_plan != null ) {
-			return m_marmot.appendIntoDataSet(m_dsId, m_plan, m_options);
+			DataSet ds = m_marmot.getDataSet(m_dsId);
+			ds.appendPlanResult(m_plan, m_options);
+			
+			return m_marmot.getDataSet(m_dsId);
 		}
 		else {
 			throw new IllegalStateException("cannot run " + this);

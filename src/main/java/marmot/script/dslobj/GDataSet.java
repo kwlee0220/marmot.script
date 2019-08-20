@@ -8,6 +8,7 @@ import groovy.lang.GroovyObjectSupport;
 import io.vavr.Lazy;
 import marmot.DataSet;
 import marmot.DataSetType;
+import marmot.ExecutePlanOptions;
 import marmot.GeometryColumnInfo;
 import marmot.InsufficientThumbnailException;
 import marmot.MarmotRuntime;
@@ -130,6 +131,11 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	@Override
 	public long append(RecordSet rset, Plan plan) {
 		return m_ds.append(rset, plan);
+	}
+
+	@Override
+	public void appendPlanResult(Plan plan, ExecutePlanOptions execOpts) {
+		m_ds.appendPlanResult(plan, execOpts);
 	}
 
 	@Override

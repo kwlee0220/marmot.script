@@ -12,7 +12,7 @@ import marmot.ExecutePlanOptions;
 import marmot.Plan;
 import marmot.Record;
 import marmot.RecordSet;
-import marmot.script.command.AppendIntoDataSetCommand;
+import marmot.script.command.AppendRecordSetIntoDataSetCommand;
 import marmot.script.command.ClusterDataSetCommand;
 import marmot.script.command.CreateDataSetCommand;
 import marmot.script.command.DeleteDataSetCommand;
@@ -52,8 +52,8 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		return execute(cmd);
 	}
 	
-	public DataSet appendIntoDataSet(String dsId, Closure<?> optDecl) throws Exception {
-		AppendIntoDataSetCommand cmd = new AppendIntoDataSetCommand(getMarmotRuntime(), dsId,
+	public DataSet appendRecordSetIntoDataSet(String dsId, Closure<?> optDecl) throws Exception {
+		AppendRecordSetIntoDataSetCommand cmd = new AppendRecordSetIntoDataSetCommand(getMarmotRuntime(), dsId,
 																	EMPTY_ARGS);
 		ScriptUtils.callClosure(optDecl, cmd);
 		return execute(cmd);
