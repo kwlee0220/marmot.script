@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutionException;
 import groovy.lang.Closure;
 import marmot.MarmotRuntime;
 import marmot.externio.shp.ExportDataSetAsShapefile;
-import marmot.externio.shp.ShapefileParameters;
+import marmot.externio.shp.ExportShapefileParameters;
 import marmot.script.ScriptParsingObject;
 import marmot.script.ScriptUtils;
 
@@ -19,7 +19,7 @@ public class ExportDataSetAsShapefileCommand extends ScriptParsingObject
 											implements ScriptCommand<Long> {
 	private final String m_dsId;
 	private final String m_shpPath;
-	private ShapefileParameters m_params = ShapefileParameters.create();
+	private ExportShapefileParameters m_params = ExportShapefileParameters.create();
 	private long m_progressInterval = -1;
 	private boolean m_force = false;
 	
