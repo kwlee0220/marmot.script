@@ -29,7 +29,6 @@ public class ImportExcelFileCommand extends GroovyDslClass
 		m_path = path;
 
 		ScriptUtils.getBooleanOption(args, "headerFirst").ifPresent(m_excelParams::headerFirst);
-		ScriptUtils.getStringOption(args, "nullString").ifPresent(m_excelParams::nullString);
 		ScriptUtils.getStringOption(args, "srid").ifPresent(m_excelParams::srid);
 		ScriptUtils.getStringOption(args, "pointColumns").ifPresent(m_excelParams::pointColumns);
 
@@ -55,11 +54,6 @@ public class ImportExcelFileCommand extends GroovyDslClass
 	
 	public ImportExcelFileCommand srid(String srid) {
 		m_excelParams.srid(srid);
-		return this;
-	}
-	
-	public ImportExcelFileCommand nullString(String value) {
-		m_excelParams.nullString(value);
 		return this;
 	}
 	
