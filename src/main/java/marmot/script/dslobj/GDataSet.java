@@ -133,10 +133,10 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 		return m_ds.append(rset, plan);
 	}
 
-	@Override
-	public void appendPlanResult(Plan plan, ExecutePlanOptions execOpts) {
-		m_ds.appendPlanResult(plan, execOpts);
-	}
+//	@Override
+//	public void appendPlanResult(Plan plan, ExecutePlanOptions execOpts) {
+//		m_ds.appendPlanResult(plan, execOpts);
+//	}
 
 	@Override
 	public SpatialIndexInfo cluster(ClusterDataSetOptions opts) {

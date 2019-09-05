@@ -102,10 +102,11 @@ public class CreateDataSetCommand extends GroovyDslClass
 	@Override
 	public DataSet execute() {
 		if ( m_plan != null ) {
-			return m_marmot.createDataSet(m_dsId, m_plan, m_options);
+			m_marmot.execute(m_plan);
+			return m_marmot.getDataSet(m_dsId);
 		}
 		else if ( m_schema != null) {
-			return m_marmot.createDataSet(m_dsId, m_schema, m_options);
+			return m_marmot.createDataSet(m_dsId, m_schema, m_options.toCreateOptions());
 		}
 		else {
 			throw new IllegalStateException("cannot run " + this);

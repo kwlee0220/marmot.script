@@ -18,6 +18,7 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 	private final MarmotRuntime m_marmot;
 	private final String m_csvPath;
 	private ImportParameters m_importParams = new ImportParameters();
+	private String m_glob = "**/*.csv"; 
 	
 	public ImportCsvFileCommand(MarmotRuntime marmot, String path, String dsId) {
 		m_marmot = marmot;
@@ -62,6 +63,12 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 		return this;
 	}
 	
+	public ImportCsvFileCommand glob(String glob) {
+		m_glob = glob;
+		return this;
+	}
+	
+	@SuppressWarnings("rawtypes")
 	public ImportCsvFileCommand options(Closure script) {
 		ScriptUtils.callClosure(script, this);
 		return this;
@@ -69,7 +76,7 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 
 	@Override
 	public Long execute() {
-		return ImportCsv.from(new File(m_csvPath), m_options, m_importParams)
+		return ImportCsv.from(new File(m_csvPath), m_options, m_importParams, m_glob)
 						.run(m_marmot);
 	}
 	

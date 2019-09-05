@@ -62,15 +62,16 @@ public class AppendRecordSetIntoDataSetCommand extends GroovyDslClass
 
 	@Override
 	public DataSet execute() {
-		if ( m_plan != null ) {
-			DataSet ds = m_marmot.getDataSet(m_dsId);
-			ds.appendPlanResult(m_plan, m_options);
-			
-			return m_marmot.getDataSet(m_dsId);
-		}
-		else {
-			throw new IllegalStateException("cannot run " + this);
-		}
+		throw new AssertionError();
+//		if ( m_plan != null ) {
+//			DataSet ds = m_marmot.getDataSet(m_dsId);
+//			ds.appendPlanResult(m_plan, m_options);
+//			
+//			return m_marmot.getDataSet(m_dsId);
+//		}
+//		else {
+//			throw new IllegalStateException("cannot run " + this);
+//		}
 	}
 	
 	@Override

@@ -52,12 +52,12 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		return execute(cmd);
 	}
 	
-	public DataSet appendRecordSetIntoDataSet(String dsId, Closure<?> optDecl) throws Exception {
-		AppendRecordSetIntoDataSetCommand cmd = new AppendRecordSetIntoDataSetCommand(getMarmotRuntime(), dsId,
-																	EMPTY_ARGS);
-		ScriptUtils.callClosure(optDecl, cmd);
-		return execute(cmd);
-	}
+//	public DataSet appendRecordSetIntoDataSet(String dsId, Closure<?> optDecl) throws Exception {
+//		AppendRecordSetIntoDataSetCommand cmd = new AppendRecordSetIntoDataSetCommand(getMarmotRuntime(), dsId,
+//																	EMPTY_ARGS);
+//		ScriptUtils.callClosure(optDecl, cmd);
+//		return execute(cmd);
+//	}
 	
 	public Void deleteDataSet(String... dsId) throws Exception {
 		DeleteDataSetCommand cmd = new DeleteDataSetCommand(getMarmotRuntime(), dsId);
