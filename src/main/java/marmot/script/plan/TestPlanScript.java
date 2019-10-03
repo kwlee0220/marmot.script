@@ -2,7 +2,6 @@ package marmot.script.plan;
 
 import java.io.File;
 
-import groovy.lang.Script;
 import marmot.Plan;
 import marmot.command.MarmotClientCommands;
 import marmot.remote.protobuf.PBMarmotClient;
