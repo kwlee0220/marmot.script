@@ -59,7 +59,7 @@ public class AggregateFunctionListParser extends GroovyDslClass {
 		return AggregateFunction.STDDEV(colName);
 	}
 	
-	public AggregateFunction GEOM_UNION(String colName) {
+	public AggregateFunction UNION_GEOM(String colName) {
 		return AggregateFunction.UNION_GEOM(colName);
 	}
 	

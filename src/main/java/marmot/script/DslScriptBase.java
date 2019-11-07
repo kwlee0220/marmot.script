@@ -1,5 +1,6 @@
 package marmot.script;
 
+import java.io.File;
 import java.util.Map;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -20,7 +21,9 @@ import marmot.optor.geo.SpatialRelation;
 import marmot.optor.geo.SquareGrid;
 import marmot.plan.JdbcConnectOptions;
 import marmot.script.dslobj.GDataSet;
+import marmot.script.dslobj.GProcess;
 import utils.Size2d;
+import utils.Utilities;
 import utils.func.FOption;
 
 /**
@@ -64,7 +67,7 @@ public abstract class DslScriptBase extends Script {
 		return super.getProperty(name);
     }
 	
-	public GDataSet DataSet(String id) {
+	public GDataSet dataset(String id) {
 		return new GDataSet(getMarmotRuntime(), id);
 	}
 	
@@ -90,6 +93,18 @@ public abstract class DslScriptBase extends Script {
 		else {
 			throw new IllegalArgumentException("unsupported Geometry object: " + obj);
 		}
+	}
+	
+	public GProcess process(String name, Closure script) {
+		Utilities.checkNotNullArgument(script, "process script closure is null");
+		
+		GProcess gproc = new GProcess(name);
+		ScriptUtils.callClosure(script, gproc);
+		return gproc;
+	}
+	
+	public File file(String path) {
+		return new File(path);
 	}
 	
 	public Plan plan(String name, Closure script) {
@@ -165,7 +180,7 @@ public abstract class DslScriptBase extends Script {
 		return AggregateFunction.STDDEV(colName);
 	}
 	
-	public AggregateFunction GEOM_UNION(String colName) {
+	public AggregateFunction UNION_GEOM(String colName) {
 		return AggregateFunction.UNION_GEOM(colName);
 	}
 	

@@ -1,0 +1,131 @@
+
+run plan('서울영역_추출') {
+	load '구역/시도'
+	filter 'ctprvn_cd == "11"'
+	store '분석결과/지하철역사_추천/서울영역', geometry: 'the_geom(EPSG:5186)', force: true
+}
+cluster dataset('분석결과/지하철역사_추천/서울영역')
+
+run plan('서울시_지하철역사_버퍼') {
+	load '교통/지하철/역사'
+	filter 'sig_cd.substring(0,2) == "11"'
+	buffer 'the_geom', 1000
+	store '분석결과/지하철역사_추천/서울시_지하철역사_버퍼', geometry: 'the_geom(EPSG:5186)', force: true
+}
+cluster dataset('분석결과/지하철역사_추천/서울시_지하철역사_버퍼')
+
+run plan('격자_집계구_비율') {
+	load '지오비전/집계구/2015'
+	filter 'block_cd.substring(0,2) == "11"'
+	differenceJoin 'the_geom', '분석결과/지하철역사_추천/서울시_지하철역사_버퍼'
+	assignGridCell 'the_geom', SquareGrid(dataset('분석결과/지하철역사_추천/서울영역'), Size2d(300,300))
+	intersection 'the_geom', 'cell_geom', output: 'overlap'
+	defineColumn "portion:double", "portion = ST_Area(overlap) / ST_Area(cell_geom)"
+	project "overlap as the_geom, cell_id, cell_pos, block_cd, portion"
+	store '분석결과/지하철역사_추천/격자_집계구_겹침_비율', geometry: 'the_geom(EPSG:5186)', force: true
+}
+cluster dataset('분석결과/지하철역사_추천/격자_집계구_겹침_비율')
+delete dataset('분석결과/지하철역사_추천/서울시_지하철역사_버퍼')
+delete dataset('분석결과/지하철역사_추천/서울영역')
+
+run plan('격자별_택시승하차_집계') {
+	load '나비콜/택시로그'
+	filter 'status == 1 || status == 2'
+	spatialJoin 'the_geom', '분석결과/지하철역사_추천/격자_집계구_겹침_비율', output: 'param.{cell_id,cell_pos}'
+	aggregateByGroup("cell_id", tags: "cell_pos", workerCount: 7) { count = COUNT() }
+	store '분석결과/지하철역사_추천/격자별_택시승하차_집계', force: true
+}
+run process('normalize') {
+	input_dataset '분석결과/지하철역사_추천/격자별_택시승하차_집계'
+	input_features 'count'
+	output_dataset '분석결과/지하철역사_추천/격자별_택시승하차'
+	output_features 'normalized'
+}
+delete dataset('분석결과/지하철역사_추천/격자별_택시승하차_집계')
+
+def avgExpr = '(' + (0..23).collect { String.format("avg_%02dtmst", it) }.join('+') + ')/24.0'
+run plan("2015년도_격자별_유동인구_수집") {
+	load '지오비전/유동인구/2015/월별_시간대'
+	filter "block_cd.startsWith('11')"
+	defineColumn "daily_avg:double", avgExpr
+	aggregateByGroup("block_cd", workerCount: 7) { avg = AVG("daily_avg") }
+	hashJoin("block_cd", '분석결과/지하철역사_추천/격자_집계구_겹침_비율', "block_cd", output: "param.*,avg")
+	update "avg *= portion"
+	aggregateByGroup("cell_id", tags: "cell_pos") { avg = SUM('avg') }
+	store '분석결과/지하철역사_추천/격자별_유동인구_2015', force: true
+}
+run process('normalize') {
+	input_dataset '분석결과/지하철역사_추천/격자별_유동인구_2015'
+	input_features 'avg'
+	output_dataset '분석결과/지하철역사_추천/격자별_유동인구'
+	output_features 'normalized'
+}
+delete dataset('분석결과/지하철역사_추천/격자별_유동인구_2015')
+
+def sumExpr = (0..23).collect { String.format("sale_amt_%02dtmst", it) }.join('+')
+run plan("2015년도_격자별_카드매출_수집") {
+	load '지오비전/카드매출/2015/일별_시간대'
+	filter "block_cd.startsWith('11')"
+	defineColumn "amount:double", sumExpr
+	aggregateByGroup("block_cd", workerCount: 11) { amount = AVG("amount") }
+	hashJoin("block_cd", '분석결과/지하철역사_추천/격자_집계구_겹침_비율', "block_cd", output: "param.*,amount")
+	update "amount *= portion"
+	aggregateByGroup("cell_id", tags: "cell_pos") { amount = SUM('amount') }
+	store '분석결과/지하철역사_추천/격자별_카드매출_2015', force: true
+}
+run process('normalize') {
+	input_dataset '분석결과/지하철역사_추천/격자별_카드매출_2015'
+	input_features 'amount'
+	output_dataset '분석결과/지하철역사_추천/격자별_카드매출'
+	output_features 'normalized'
+}
+delete dataset('분석결과/지하철역사_추천/격자별_카드매출_2015')
+
+def mergeExpr1 = """
+if ( normalized == null ) {
+	cell_id = right_cell_id;
+	normalized = 0;
+}
+else if ( right_normalized == null ) {
+	right_normalized = 0;
+}
+normalized = normalized + right_normalized;
+"""
+def mergeExpr2 = """
+if ( normalized == null ) {
+	cell_id = param_cell_id;
+	normalized = 0;
+}
+else if ( param_normalized == null ) {
+	param_normalized = 0;
+}
+normalized = normalized + param_normalized;
+"""
+
+run plan('격자별_유동인구_카드매출_택시승하차_표준값_합계') {
+	loadHashJoinFile('분석결과/지하철역사_추천/격자별_카드매출', 'cell_id',
+					'분석결과/지하철역사_추천/격자별_유동인구', 'cell_id',
+					output: 'left.*,right.{cell_id as right_cell_id,normalized as right_normalized}',
+					type: 'FULL_OUTER_JOIN', workerCount: 11)
+	update mergeExpr1
+	project "cell_id,normalized"
+	hashJoin 'cell_id', '분석결과/지하철역사_추천/격자별_택시승하차', 'cell_id',
+				output: "*,param.{cell_id as param_cell_id,normalized as param_normalized}",
+				type: 'FULL_OUTER_JOIN', workerCount: 11
+	update mergeExpr2
+	project "cell_id,normalized as value"
+	store '분석결과/지하철역사_추천/통합본', force: true
+}
+delete dataset('분석결과/지하철역사_추천/격자별_카드매출')
+delete dataset('분석결과/지하철역사_추천/격자별_유동인구')
+delete dataset('분석결과/지하철역사_추천/격자별_택시승하차')
+
+run plan("공간데이터 첨부") {
+	load '분석결과/지하철역사_추천/격자_집계구_겹침_비율'
+	aggregateByGroup("cell_id", tags: "cell_pos") { the_geom = UNION_GEOM('the_geom') }
+	hashJoin 'cell_id', '분석결과/지하철역사_추천/통합본', 'cell_id',
+			output: "the_geom,cell_id,cell_pos,param.value"
+	store '분석결과/지하철역사_추천/결과', geometry: 'the_geom(EPSG:5186)', force: true
+}
+delete dataset('분석결과/지하철역사_추천/통합본')
+delete dataset('분석결과/지하철역사_추천/격자_집계구_겹침_비율')

@@ -68,6 +68,11 @@ public abstract class PlanDslHandler extends DslScriptBase {
 	public PlanBuilder load(String dsId) {
 		return load(new HashMap<>(), dsId);
 	}
+	
+	public PlanBuilder store(Map<String,Object> args, String dsId) {
+		StoreDataSetOptions opts = parseStoreDataSetOptions(args);
+		return m_builder.store(dsId, opts);
+	}
 
 	public PlanBuilder loadTextFile(String... paths) {
 		setupState();
@@ -495,6 +500,12 @@ public abstract class PlanDslHandler extends DslScriptBase {
 		m_builder.intersection(leftGeomCol, rightGeomCol, outGeomCol);
 		return m_builder;
 	}
+	public PlanBuilder intersection(String leftGeomCol, String rightGeomCol) {
+		setupState();
+		
+		m_builder.intersection(leftGeomCol, rightGeomCol, leftGeomCol);
+		return m_builder;
+	}
 
 	public PlanBuilder query(String dsId, Object key) {
 		setupState();
@@ -566,6 +577,12 @@ public abstract class PlanDslHandler extends DslScriptBase {
 		
 		m_builder.arcClip(geomCol, paramDsId);
 		return m_builder;
+	}
+	
+	public PlanBuilder differenceJoin(String geomCol, String paramDsId) {
+		setupState();
+		
+		return m_builder.differenceJoin(geomCol, paramDsId);
 	}
 	
 	public PlanBuilder loadGrid(Map<String,Object> args, SquareGrid grid) {

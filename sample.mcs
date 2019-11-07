@@ -1,4 +1,3 @@
-
 createDataSet('tmp/result') {
 	geometry 'the_geom(EPSG:5186)'
 	force = true

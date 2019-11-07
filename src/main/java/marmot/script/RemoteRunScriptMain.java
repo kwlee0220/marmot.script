@@ -2,6 +2,7 @@ package marmot.script;
 
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.Reader;
 
 import io.vavr.CheckedConsumer;

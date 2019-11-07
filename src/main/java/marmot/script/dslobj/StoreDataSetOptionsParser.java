@@ -22,17 +22,8 @@ public class StoreDataSetOptionsParser extends GroovyObjectSupport {
 		
 		opts = getBooleanOption(args, "force").transform(opts, StoreDataSetOptions::force);
 		opts = getOption(args, "geometry")
-				.mapTE(info -> {
-					if ( info instanceof String ) {
-						return GeometryColumnInfo.fromString((String)info);
-					}
-					else if ( info instanceof GeometryColumnInfo ) {
-						return (GeometryColumnInfo)info;
-					}
-					else {
-						throw new IllegalArgumentException("incorrect GeometryColumnInfo: " + info);
-					}
-				})
+				.cast(String.class)
+				.mapTE(GeometryColumnInfo::fromString)
 				.transform(opts, StoreDataSetOptions::geometryColumnInfo);
 		
 		return opts;

@@ -9,14 +9,14 @@ import com.vividsolutions.jts.geom.Geometry;
 import groovy.lang.Closure;
 import marmot.DataSet;
 import marmot.ExecutePlanOptions;
+import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.Record;
 import marmot.RecordSet;
-import marmot.script.command.AppendRecordSetIntoDataSetCommand;
 import marmot.script.command.ClusterDataSetCommand;
+import marmot.script.command.CommandReport;
 import marmot.script.command.CreateDataSetCommand;
 import marmot.script.command.DeleteDataSetCommand;
-import marmot.script.command.ExecuteProcessCommand;
 import marmot.script.command.ExportDataSetAsCsvCommand;
 import marmot.script.command.ExportDataSetAsShapefileCommand;
 import marmot.script.command.ImportCsvFileCommand;
@@ -29,7 +29,10 @@ import marmot.script.command.RunPlanToLongCommand;
 import marmot.script.command.RunPlanToRecordCommand;
 import marmot.script.command.RunPlanToRecordSetCommand;
 import marmot.script.command.RunPlanToStringCommand;
+import marmot.script.command.RunProcessCommand;
 import marmot.script.command.ScriptCommand;
+import marmot.script.dslobj.GDataSet;
+import marmot.script.dslobj.GProcess;
 import utils.StopWatch;
 
 
@@ -52,15 +55,8 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		return execute(cmd);
 	}
 	
-//	public DataSet appendRecordSetIntoDataSet(String dsId, Closure<?> optDecl) throws Exception {
-//		AppendRecordSetIntoDataSetCommand cmd = new AppendRecordSetIntoDataSetCommand(getMarmotRuntime(), dsId,
-//																	EMPTY_ARGS);
-//		ScriptUtils.callClosure(optDecl, cmd);
-//		return execute(cmd);
-//	}
-	
-	public Void deleteDataSet(String... dsId) throws Exception {
-		DeleteDataSetCommand cmd = new DeleteDataSetCommand(getMarmotRuntime(), dsId);
+	public Void delete(GDataSet ds) throws Exception {
+		DeleteDataSetCommand cmd = new DeleteDataSetCommand(getMarmotRuntime(), ds.getId());
 		return execute(cmd);
 	}
 	
@@ -69,68 +65,74 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		return execute(cmd);
 	}
 	
-	public Void clusterDataSet(String dsId) throws Exception {
-		ClusterDataSetCommand cmd = new ClusterDataSetCommand(getMarmotRuntime(), dsId);
+	public CommandReport cluster(GDataSet ds) throws Exception {
+		ClusterDataSetCommand cmd = new ClusterDataSetCommand(getMarmotRuntime(), ds.getId());
 		return execute(cmd);
 	}
 	
-	public Void run(Plan plan) throws Exception {
+	public void run(Plan plan) throws Exception {
 		RunPlanCommand cmd = new RunPlanCommand(getMarmotRuntime(), plan);
-		return execute(cmd);
+		execute(cmd);
+	}
+	public void run(Map<String,Object> args, Plan plan) throws Exception {
+		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
+		RunPlanCommand cmd = new RunPlanCommand(getMarmotRuntime(), plan, opts);
+		execute(cmd);
 	}
 	
-	public RecordSet runPlanToRecordSet(Map<String,Object> args, Plan plan) throws Exception {
+	public Void run(GProcess gproc) throws Exception {
+		RunProcessCommand cmd = new RunProcessCommand(getMarmotRuntime(), gproc);
+		return cmd.execute();
+	}
+	
+	public RecordSet runToRecordSet(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToRecordSetCommand cmd = new RunPlanToRecordSetCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
-	public RecordSet runPlanToRecordSet(Plan plan) throws Exception {
-		return runPlanToRecordSet(EMPTY_ARGS, plan);
+	public RecordSet runToRecordSet(Plan plan) throws Exception {
+		return runToRecordSet(EMPTY_ARGS, plan);
 	}
 	
-	public Record runPlanToRecord(Map<String,Object> args, Plan plan) throws Exception {
+	public Record runToRecord(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToRecordCommand cmd = new RunPlanToRecordCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
-	public Record runPlanToRecord(Plan plan) throws Exception {
-		return runPlanToRecord(EMPTY_ARGS, plan);
+	public Record runToRecord(Plan plan) throws Exception {
+		return runToRecord(EMPTY_ARGS, plan);
 	}
 	
-	public Geometry runPlanToGeometry(Map<String,Object> args, Plan plan) throws Exception {
+	public Geometry runToGeometry(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToGeometryCommand cmd = new RunPlanToGeometryCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
-	public Geometry runPlanToGeometry(Plan plan) throws Exception {
-		return runPlanToGeometry(EMPTY_ARGS, plan);
+	public Geometry runToGeometry(Plan plan) throws Exception {
+		return runToGeometry(EMPTY_ARGS, plan);
 	}
 	
-	public Long runPlanToLong(Map<String,Object> args, Plan plan) throws Exception {
+	public Long runToLong(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToLongCommand cmd = new RunPlanToLongCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
-	public Long runPlanToLong(Plan plan) throws Exception {
-		return runPlanToLong(EMPTY_ARGS, plan);
+	public Long runToLong(Plan plan) throws Exception {
+		return runToLong(EMPTY_ARGS, plan);
 	}
 	
-	public String runPlanToString(Map<String,Object> args, Plan plan) throws Exception {
+	public String runToString(Map<String,Object> args, Plan plan) throws Exception {
 		ExecutePlanOptions opts = ScriptUtils.parseExecutePlanOptions(args);
 		RunPlanToStringCommand cmd = new RunPlanToStringCommand(getMarmotRuntime(), plan, opts);
 		return execute(cmd);
 	}
-	public String runPlanToString(Plan plan) throws Exception {
-		return runPlanToString(EMPTY_ARGS, plan);
+	public String runToString(Plan plan) throws Exception {
+		return runToString(EMPTY_ARGS, plan);
 	}
 	
-	public long importShapefile(Map<String,Object> args, String shpPath,
-								String dsId, Closure<?> optDecl) throws Exception {
-		ImportShapefileCommand cmd = new ImportShapefileCommand(getMarmotRuntime(), shpPath, dsId, args, optDecl);
-		return execute(cmd);
-	}
 	public long importShapefile(String shpPath, String dsId, Closure<?> optDecl) throws Exception {
-		return importShapefile(EMPTY_ARGS, shpPath, dsId, optDecl);
+		MarmotRuntime marmot = getMarmotRuntime();
+		return execute(new ImportShapefileCommand(marmot, shpPath, dsId, optDecl));
 	}
 	
 	public long exportDataSetToShapefile(Map<String,Object> args, String dsId,
@@ -152,10 +154,13 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 																EMPTY_ARGS, optDecl);
 		return execute(cmd);
 	}
-	
+
+	public long importCsvFile(String csvPath, String dsId, Closure<?> optDecl) throws Exception {
+		MarmotRuntime marmot = getMarmotRuntime();
+		return execute(new ImportCsvFileCommand(marmot, csvPath, dsId, optDecl));
+	}
 	public long importCsvFile(String csvPath, String dsId) throws Exception {
-		ImportCsvFileCommand cmd = new ImportCsvFileCommand(getMarmotRuntime(), csvPath, dsId);
-		return execute(cmd);
+		return importCsvFile(csvPath, dsId, null);
 	}
 	
 	public long exportDataSetAsCsv(Map<String,Object> args, String dsId,
@@ -188,12 +193,7 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		return importExcelFile(EMPTY_ARGS, shpPath, dsId, optDecl);
 	}
 	
-	public Void executeProcess(Map<String,Object> args, String procName) throws Exception {
-		ExecuteProcessCommand cmd = new ExecuteProcessCommand(getMarmotRuntime(), procName, args);
-		return execute(cmd);
-	}
-	
-	public <T> T execute(ScriptCommand<T> cmd) throws Exception {
+	private <T> T execute(ScriptCommand<T> cmd) throws Exception {
 		if ( m_verbose == null ) {
 			m_verbose = (Boolean)getBinding().getProperty("MARMOT_VERBOSE");
 		}
@@ -206,8 +206,8 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		try {
 			T ret = cmd.execute();
 			if ( m_verbose ) {
-				System.out.printf(" -> done: %s (elapsed=%s)%n",
-									ret, watch.getElapsedSecondString());
+				String msg = ret != null ? ret.toString() : "done";
+				System.out.printf(" -> %s (elapsed=%s)%n", msg, watch.getElapsedSecondString());
 			}
 			
 			return ret;

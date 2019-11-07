@@ -34,6 +34,9 @@ public class MarmotScriptEngine {
 		
 		ImportCustomizer customImports = new ImportCustomizer();
 		customImports.addImports("marmot.RecordScript");
+		customImports.addImports("com.vividsolutions.jts.geom.Geometry");
+		customImports.addImports("marmot.Record", "marmot.RecordSet");
+
 		m_config.addCompilationCustomizers(customImports);
 	}
 	
@@ -52,5 +55,6 @@ public class MarmotScriptEngine {
 	
 	public void evaluate(Reader reader) throws IOException {
 		new GroovyShell(m_binding, m_config).evaluate(reader);
+//		new GroovyShell(m_binding, m_config).run(reader, "test", new String[0]);
 	}
 }

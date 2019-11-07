@@ -20,46 +20,18 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 	private ImportParameters m_importParams = new ImportParameters();
 	private String m_glob = "**/*.csv"; 
 	
-	public ImportCsvFileCommand(MarmotRuntime marmot, String path, String dsId) {
+	public ImportCsvFileCommand(MarmotRuntime marmot, String path, String dsId, Closure<?> opts) {
 		m_marmot = marmot;
 		m_csvPath = path;
 		m_importParams.setDataSetId(dsId);
-	}
-	
-	@Override
-	public Object getProperty(String name) {
-		switch ( name ) {
-			case "force":
-				m_importParams.setForce(true);
-				return this;
-		}
 		
-		return super.getProperty(name);
-	}
-
-	@Override
-    public void setProperty(String name, Object newValue) {
-		switch ( name ) {
-			case "force":
-				m_importParams.setForce((Boolean)newValue);
-				return;
+		if ( opts != null ) {
+			ScriptUtils.callClosure(opts, this);
 		}
-		
-		super.setProperty(name, newValue);
 	}
 	
 	public ImportCsvFileCommand geometry(String str) {
 		m_importParams.setGeometryColumnInfo(GeometryColumnInfo.fromString(str));
-		return this;
-	}
-	
-	public ImportCsvFileCommand blockSize(Object obj) {
-		m_importParams.setBlockSize(ScriptUtils.parseByteLength(obj));
-		return this;
-	}
-	
-	public ImportCsvFileCommand compressionCodecName(String codecName) {
-		m_importParams.setCompressionCodecName(codecName);
 		return this;
 	}
 	
@@ -68,9 +40,28 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 		return this;
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public ImportCsvFileCommand options(Closure script) {
-		ScriptUtils.callClosure(script, this);
+	public ImportCsvFileCommand force(boolean flag) {
+		m_importParams.setForce(flag);
+		return this;
+	}
+	
+	public ImportCsvFileCommand append(boolean flag) {
+		m_importParams.setAppend(flag);
+		return this;
+	}
+	
+	public ImportCsvFileCommand compressionCodecName(String codecName) {
+		m_importParams.setCompressionCodecName(codecName);
+		return this;
+	}
+	
+	public ImportCsvFileCommand blockSize(Object blkSize) {
+		m_importParams.setBlockSize(ScriptUtils.parseByteLength(blkSize));
+		return this;
+	}
+	
+	public ImportCsvFileCommand reportInterval(int intvl) {
+		m_importParams.setReportInterval(intvl);
 		return this;
 	}
 
@@ -82,7 +73,7 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 	
 	@Override
 	public String toString() {
-		return String.format("import_csv('%s','%s',delim='%s')",
+		return String.format("importCsvFile('%s','%s',delim='%s')",
 							m_csvPath, m_importParams.getDataSetId(), m_options.delimiter());
 	}
 }

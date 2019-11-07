@@ -2,32 +2,28 @@ package marmot.script.command;
 
 import marmot.MarmotRuntime;
 import marmot.script.GroovyDslClass;
-import utils.stream.FStream;
 
 /**
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class DeleteDataSetCommand extends GroovyDslClass
-									implements ScriptCommand<Void> {
+public class DeleteDataSetCommand extends GroovyDslClass implements ScriptCommand<Void> {
 	private final MarmotRuntime m_marmot;
-	private String[] m_dsIds;
+	private String m_dsId;
 	
-	public DeleteDataSetCommand(MarmotRuntime marmot, String... ids) {
+	public DeleteDataSetCommand(MarmotRuntime marmot, String dsId) {
 		m_marmot = marmot;
-		m_dsIds = ids;
+		m_dsId = dsId;
 	}
 
 	@Override
 	public Void execute() {
-		for ( String id: m_dsIds ) {
-			try {
-				m_marmot.getDataSet(id);
-				m_marmot.deleteDataSet(id);
-			}
-			catch ( Exception e ) {
-				m_marmot.deleteDir(id);
-			}
+		try {
+			m_marmot.getDataSet(m_dsId);
+			m_marmot.deleteDataSet(m_dsId);
+		}
+		catch ( Exception e ) {
+			m_marmot.deleteDir(m_dsId);
 		}
 		
 		return null;
@@ -35,7 +31,6 @@ public class DeleteDataSetCommand extends GroovyDslClass
 	
 	@Override
 	public String toString() {
-		String idsStr = FStream.of(m_dsIds).map(id ->  String.format("'%s'", id)).join(",");
-		return String.format("DeleteDataSet '%s'", idsStr);
+		return String.format("delete dataset(%s)", m_dsId);
 	}
 }

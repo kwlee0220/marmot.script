@@ -1,0 +1,21 @@
+/*
+Record rec = runToRecord plan('서울영역_추출') {
+	load '구역/시도'
+	filter 'ctprvn_cd == "11"'
+	project '*-{the_geom}'
+}
+*/
+
+importShapefile('/mnt/data/sbdata/data/포스웨이브/서울지하철역사', '교통/지하철/서울역사') {
+	geometry 'the_geom(EPSG:5186)'
+	charset 'euc-kr'
+	force true
+}
+
+importCsvFile('/mnt/data/sbdata/data/공공데이터포털/주유소_가격', 'POI/주유소_가격') {
+	delim '|'
+	headerFirst true
+	pointColumns '경도|위도'
+	geometry 'the_geom(EPSG:5186)'
+	force true
+}
