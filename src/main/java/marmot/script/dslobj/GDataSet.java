@@ -5,10 +5,8 @@ import java.util.List;
 import com.vividsolutions.jts.geom.Envelope;
 
 import groovy.lang.GroovyObjectSupport;
-import io.vavr.Lazy;
 import marmot.DataSet;
 import marmot.DataSetType;
-import marmot.ExecutePlanOptions;
 import marmot.GeometryColumnInfo;
 import marmot.InsufficientThumbnailException;
 import marmot.MarmotRuntime;
@@ -21,6 +19,7 @@ import marmot.geo.catalog.IndexNotFoundException;
 import marmot.geo.catalog.SpatialIndexInfo;
 import marmot.geo.command.ClusterDataSetOptions;
 import utils.func.FOption;
+import utils.func.Lazy;
 
 /**
  * 
@@ -35,7 +34,7 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 		m_marmot = marmot;
 		m_dsId = dsId;
 		
-		m_ds = Lazy.val(() -> m_marmot.getDataSet(m_dsId), DataSet.class);
+		m_ds = Lazy.wrap(() -> m_marmot.getDataSet(m_dsId), DataSet.class);
 	}
 
 	@Override

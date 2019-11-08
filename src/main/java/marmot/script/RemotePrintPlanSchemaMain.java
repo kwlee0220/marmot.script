@@ -2,7 +2,6 @@ package marmot.script;
 
 import java.io.File;
 
-import io.vavr.CheckedConsumer;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordSchema;
@@ -15,6 +14,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Parameters;
+import utils.func.CheckedConsumer;
 
 /**
  * 

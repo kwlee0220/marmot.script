@@ -2,10 +2,8 @@ package marmot.script;
 
 import java.io.File;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.Reader;
 
-import io.vavr.CheckedConsumer;
 import marmot.MarmotRuntime;
 import marmot.command.MarmotClientCommands;
 import marmot.command.MarmotConnector;
@@ -16,6 +14,7 @@ import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import utils.func.CheckedConsumer;
 
 /**
  * 
