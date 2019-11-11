@@ -34,6 +34,7 @@ import marmot.script.command.ScriptCommand;
 import marmot.script.dslobj.GDataSet;
 import marmot.script.dslobj.GProcess;
 import utils.StopWatch;
+import utils.Throwables;
 
 
 /**
@@ -213,10 +214,13 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 			return ret;
 		}
 		catch ( Exception e ) {
+			Throwable cause = Throwables.unwrapThrowable(e);
 			if ( m_verbose ) {
-				System.out.printf(" -> cause=%s%n", cmd, e);
+				System.out.printf(" -> cause=%s%n", cmd, cause);
 			}
-			throw e;
+			
+			Throwables.sneakyThrow(cause);
+			throw new AssertionError();
 		}
 	}
 }

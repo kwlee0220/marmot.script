@@ -25,24 +25,23 @@ import marmot.script.dslobj.GProcess;
 import utils.Size2d;
 import utils.Utilities;
 import utils.func.FOption;
+import utils.func.Lazy;
 
 /**
  * 
  * @author Kang-Woo Lee (ETRI)
  */
 public abstract class DslScriptBase extends Script {
-	private volatile MarmotRuntime m_marmot;
+	private final MarmotRuntime m_marmot;
 	
-	protected DslScriptBase() { }
+	protected DslScriptBase() {
+		m_marmot = Lazy.wrap(() -> (MarmotRuntime)getBinding().getProperty("MARMOT"), MarmotRuntime.class);
+	}
 	protected DslScriptBase(MarmotRuntime marmot) {
 		m_marmot = marmot;
 	}
 	
 	protected MarmotRuntime getMarmotRuntime() {
-		if ( m_marmot == null ) {
-			m_marmot = (MarmotRuntime)getBinding().getProperty("MARMOT");
-		}
-		
 		return m_marmot;
 	}
 	

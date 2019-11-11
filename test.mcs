@@ -1,4 +1,3 @@
-
 run plan('서울영역_추출') {
 	load '구역/시도'
 	filter 'ctprvn_cd == "11"'
@@ -25,6 +24,13 @@ run plan('격자_집계구_비율') {
 	store '분석결과/지하철역사_추천/격자_집계구_겹침_비율', geometry: 'the_geom(EPSG:5186)', force: true
 }
 cluster dataset('분석결과/지하철역사_추천/격자_집계구_겹침_비율')
+
+run plan("결과용 공간데이터 생성") {
+	load '분석결과/지하철역사_추천/격자_집계구_겹침_비율'
+	aggregateByGroup("cell_id", tags: "cell_pos") { the_geom = UNION_GEOM('the_geom') }
+	store '분석결과/지하철역사_추천/결과용_공간데이터', geometry: 'the_geom(EPSG:5186)', force: true
+}
+
 delete dataset('분석결과/지하철역사_추천/서울시_지하철역사_버퍼')
 delete dataset('분석결과/지하철역사_추천/서울영역')
 
