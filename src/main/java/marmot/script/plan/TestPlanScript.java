@@ -17,6 +17,6 @@ public class TestPlanScript {
 		PlanScriptParser parser = new PlanScriptParser(marmot);
 		Plan plan = parser.parse("sample_plan", new File("sample_plan.mps"));
 		
-		System.out.println(plan.toJson());
+		System.out.println(plan.toJson(false));
 	}
 }
