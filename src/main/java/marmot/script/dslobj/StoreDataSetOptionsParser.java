@@ -23,7 +23,7 @@ public class StoreDataSetOptionsParser extends GroovyObjectSupport {
 		opts = getBooleanOption(args, "force").transform(opts, StoreDataSetOptions::force);
 		opts = getOption(args, "geometry")
 				.cast(String.class)
-				.mapTE(GeometryColumnInfo::fromString)
+				.map(GeometryColumnInfo::fromString)
 				.transform(opts, StoreDataSetOptions::geometryColumnInfo);
 		
 		return opts;
