@@ -81,6 +81,17 @@ publishing {
 	}
 }
 
+ext.distDir = "${System.env.HOME}/etc/marmot/marmot.script.dist"
+task distributeBinary(type:Copy) {
+	dependsOn assemble
+	into "${distDir}"
+	from ("${projectDir}") {
+		include 'bin/**'
+		include '*.properties'
+		include '.gitignore'
+	}
+}
+
 apply plugin: 'eclipse'
 eclipse {
 	classpath {
