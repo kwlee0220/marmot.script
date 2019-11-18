@@ -88,6 +88,8 @@ task distributeBinary(type:Copy) {
 	from ("${projectDir}") {
 		include 'bin/**'
 		include '*.properties'
+		include '*.mcs'
+		include '*.mps'
 		include '.gitignore'
 	}
 }
