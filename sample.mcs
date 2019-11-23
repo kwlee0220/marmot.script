@@ -1,57 +1,35 @@
-createDataSet('tmp/result') {
-	geometry 'the_geom(EPSG:5186)'
-	force = true
-	from plan('create_plan') {
-		load '교통/지하철/서울역사'
-		filter 'trnsit_yn==1'
-	}
+run plan('서울영역_추출') {
+	load '구역/시도'
+	filter 'ctprvn_cd == "11"'
+	store '분석결과/지하철역사_추천/서울영역', geometry: 'the_geom(EPSG:5186)', force: true
 }
-clusterDataSet '교통/지하철/서울역사'
+cluster dataset('분석결과/지하철역사_추천/서울영역')
 
-deleteDataSet 'tmp/result'
-deleteDataSet 'tmp/result2'
-
-createDataSet('tmp/result2') {
-	from plan('create_plan') {
-		load '교통/지하철/서울역사'
-		filter 'trnsit_yn==1'
-		project 'KOR_SUB_NM'
-	}
+run plan('서울시_지하철역사_버퍼') {
+	load '교통/지하철/역사'
+	filter 'sig_cd.substring(0,2) == "11"'
+	buffer 'the_geom', 1000
+	store '분석결과/지하철역사_추천/서울시_지하철역사_버퍼', geometry: 'the_geom(EPSG:5186)', force: true
 }
-moveDataSet 'tmp/result2', 'tmp/result'
+cluster dataset('분석결과/지하철역사_추천/서울시_지하철역사_버퍼')
 
-createDataSet('tmp/result') {
-	geometry 'the_geom(EPSG:5186)'
-	schema {
-		the_geom multi_polygon
-		age int; trasit boolean
-	}
-	force = true
+run plan('격자_집계구_비율') {
+	load '지오비전/집계구/2015'
+	filter 'block_cd.substring(0,2) == "11"'
+	differenceJoin 'the_geom', '분석결과/지하철역사_추천/서울시_지하철역사_버퍼'
+	assignGridCell 'the_geom', SquareGrid(dataset('분석결과/지하철역사_추천/서울영역'), Size2d(300,300))
+	intersection 'the_geom', 'cell_geom', output: 'overlap'
+	defineColumn "portion:double", "portion = ST_Area(overlap) / ST_Area(cell_geom)"
+	project "overlap as the_geom, cell_id, cell_pos, block_cd, portion"
+	store '분석결과/지하철역사_추천/격자_집계구_겹침_비율', geometry: 'the_geom(EPSG:5186)', force: true
 }
+cluster dataset('분석결과/지하철역사_추천/격자_집계구_겹침_비율')
 
-createDataSet('tmp/result') {
-	geometry 'the_geom(EPSG:5186)'
-	force = true
-	from plan('create_plan') {
-		loadTextFile '교통/지하철/서울역사'
-		filter 'trnsit_yn==1'
-		project 'KOR_SUB_NM'
-	}
+run plan("결과용 공간데이터 생성") {
+	load '분석결과/지하철역사_추천/격자_집계구_겹침_비율'
+	aggregateByGroup("cell_id", tags: "cell_pos") { the_geom = UNION_GEOM('the_geom') }
+	store '분석결과/지하철역사_추천/결과용_공간데이터', geometry: 'the_geom(EPSG:5186)', force: true
 }
 
-runPlanToGeometry plan("get_seoul") {
-	load("구역/시도")
-	filter("ctprvn_cd == '11'")
-}
-
-runPlanToGeometry(disableLocalExec: false, mapOutputCompressionCode: 'Snappy',
-	plan("get_seoul") {
-		load("구역/시도")
-		filter("ctprvn_cd == '11'")
-	}
-)
-
-runPlanToRecordSet plan("get_seoul") {
-	load("구역/시도")
-	filter("ctprvn_cd == '11'")
-}
+delete dataset('분석결과/지하철역사_추천/서울시_지하철역사_버퍼')
+delete dataset('분석결과/지하철역사_추천/서울영역')

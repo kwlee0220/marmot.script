@@ -1,5 +1,6 @@
 package marmot.script.dslobj;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -118,7 +119,7 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public RecordSet queryRange(Envelope range, FOption<String> filterExpr) {
+	public RecordSet queryRange(Envelope range, FOption<String> filterExpr) throws IOException {
 		return new GRecordSet(m_ds.queryRange(range, filterExpr));
 	}
 
@@ -164,7 +165,7 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 
 	@Override
 	public RecordSet readThumbnail(Envelope bounds, int count)
-			throws ThumbnailNotFoundException, InsufficientThumbnailException {
+			throws ThumbnailNotFoundException, InsufficientThumbnailException, IOException {
 		return new GRecordSet(m_ds.readThumbnail(bounds, count));
 	}
 
