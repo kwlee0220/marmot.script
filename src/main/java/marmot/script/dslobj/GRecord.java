@@ -1,5 +1,6 @@
 package marmot.script.dslobj;
 
+import java.util.List;
 import java.util.Map;
 
 import marmot.ColumnNotFoundException;
@@ -37,8 +38,8 @@ public class GRecord implements Record {
 	}
 
 	@Override
-	public Object[] getAll() {
-		return m_record.getAll();
+	public List<Object> getValues() {
+		return m_record.getValues();
 	}
 
 	@Override
@@ -57,13 +58,13 @@ public class GRecord implements Record {
 	}
 
 	@Override
-	public Record set(Map<String, Object> values) {
-		return m_record.set(values);
+	public Record setValues(Map<String, Object> values) {
+		return m_record.setValues(values);
 	}
 
 	@Override
-	public Record setAll(Iterable<?> values) {
-		return m_record.setAll(values);
+	public Record setValues(Iterable<?> values) {
+		return m_record.setValues(values);
 	}
 
 	@Override
