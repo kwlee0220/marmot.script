@@ -1,7 +1,6 @@
 package marmot.script.dslobj;
 
 import java.io.IOException;
-import java.util.List;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -14,11 +13,11 @@ import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordSchema;
 import marmot.RecordSet;
-import marmot.SpatialClusterInfo;
 import marmot.ThumbnailNotFoundException;
 import marmot.geo.catalog.IndexNotFoundException;
 import marmot.geo.catalog.SpatialIndexInfo;
 import marmot.geo.command.ClusterDataSetOptions;
+import marmot.geo.query.RangeQueryEstimate;
 import utils.func.FOption;
 import utils.func.Lazy;
 
@@ -119,8 +118,13 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public RecordSet queryRange(Envelope range, FOption<String> filterExpr) throws IOException {
-		return new GRecordSet(m_ds.queryRange(range, filterExpr));
+	public RangeQueryEstimate estimateRangeQuery(Envelope range) throws IOException {
+		return m_ds.estimateRangeQuery(range);
+	}
+
+	@Override
+	public RecordSet queryRange(Envelope range, int nsamples) throws IOException {
+		return new GRecordSet(m_ds.queryRange(range, nsamples));
 	}
 
 	@Override
@@ -146,11 +150,6 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	@Override
 	public void deleteSpatialCluster() {
 		m_ds.deleteSpatialCluster();
-	}
-
-	@Override
-	public List<SpatialClusterInfo> querySpatialClusterInfo(Envelope bounds) {
-		return m_ds.querySpatialClusterInfo(bounds);
 	}
 
 	@Override
