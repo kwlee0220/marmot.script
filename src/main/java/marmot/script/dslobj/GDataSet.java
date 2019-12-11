@@ -43,11 +43,6 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public MarmotRuntime getMarmotRuntime() {
-		return m_marmot;
-	}
-
-	@Override
 	public RecordSchema getRecordSchema() {
 		return m_ds.getRecordSchema();
 	}
