@@ -7,12 +7,12 @@ import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Geometry;
 
 import groovy.lang.Closure;
-import marmot.DataSet;
 import marmot.ExecutePlanOptions;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.Record;
 import marmot.RecordSet;
+import marmot.dataset.DataSet;
 import marmot.script.command.ClusterDataSetCommand;
 import marmot.script.command.CommandReport;
 import marmot.script.command.CreateDataSetCommand;

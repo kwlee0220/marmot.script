@@ -3,10 +3,10 @@ package marmot.script.command;
 import java.util.Map;
 
 import groovy.lang.Closure;
-import marmot.DataSet;
 import marmot.ExecutePlanOptions;
 import marmot.MarmotRuntime;
 import marmot.Plan;
+import marmot.dataset.DataSet;
 import marmot.script.GroovyDslClass;
 import marmot.script.ScriptUtils;
 

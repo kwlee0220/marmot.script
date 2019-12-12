@@ -1,7 +1,7 @@
 package marmot.script.command;
 
-import marmot.DataSet;
 import marmot.MarmotRuntime;
+import marmot.dataset.DataSet;
 import marmot.geo.catalog.SpatialIndexInfo;
 import marmot.script.GroovyDslClass;
 import marmot.script.command.ClusterDataSetCommand.ClusterReport;

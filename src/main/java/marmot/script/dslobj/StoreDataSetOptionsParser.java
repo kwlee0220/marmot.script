@@ -6,8 +6,8 @@ import static marmot.script.ScriptUtils.getOption;
 import java.util.Map;
 
 import groovy.lang.GroovyObjectSupport;
-import marmot.GeometryColumnInfo;
-import marmot.StoreDataSetOptions;
+import marmot.dataset.GeometryColumnInfo;
+import marmot.optor.StoreDataSetOptions;
 import marmot.script.ScriptUtils;
 
 /**

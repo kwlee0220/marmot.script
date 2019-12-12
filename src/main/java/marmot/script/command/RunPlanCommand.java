@@ -3,11 +3,11 @@ package marmot.script.command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import marmot.DataSet;
 import marmot.ExecutePlanOptions;
 import marmot.MarmotRuntime;
 import marmot.Plan;
-import marmot.StoreDataSetOptions;
+import marmot.dataset.DataSet;
+import marmot.optor.StoreDataSetOptions;
 import marmot.proto.optor.StoreDataSetProto;
 import marmot.script.GroovyDslClass;
 import marmot.script.command.RunPlanCommand.RunPlanReport;

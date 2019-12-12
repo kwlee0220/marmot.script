@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Map;
 
 import groovy.lang.Closure;
-import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.command.ImportParameters;
+import marmot.dataset.GeometryColumnInfo;
 import marmot.externio.excel.ExcelParameters;
 import marmot.externio.excel.ImportExcel;
 import marmot.script.GroovyDslClass;

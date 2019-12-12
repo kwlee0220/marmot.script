@@ -1,19 +1,15 @@
 package marmot.script.dslobj;
 
-import java.io.IOException;
-
 import com.vividsolutions.jts.geom.Envelope;
 
 import groovy.lang.GroovyObjectSupport;
-import marmot.DataSet;
-import marmot.DataSetType;
-import marmot.GeometryColumnInfo;
-import marmot.InsufficientThumbnailException;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordSchema;
 import marmot.RecordSet;
-import marmot.ThumbnailNotFoundException;
+import marmot.dataset.DataSet;
+import marmot.dataset.DataSetType;
+import marmot.dataset.GeometryColumnInfo;
 import marmot.geo.catalog.IndexNotFoundException;
 import marmot.geo.catalog.SpatialIndexInfo;
 import marmot.geo.command.ClusterDataSetOptions;
@@ -50,11 +46,6 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	@Override
 	public DataSetType getType() {
 		return m_ds.getType();
-	}
-
-	@Override
-	public String getDirName() {
-		return m_ds.getDirName();
 	}
 
 	@Override
@@ -113,12 +104,12 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public RangeQueryEstimate estimateRangeQuery(Envelope range) throws IOException {
+	public RangeQueryEstimate estimateRangeQuery(Envelope range) {
 		return m_ds.estimateRangeQuery(range);
 	}
 
 	@Override
-	public RecordSet queryRange(Envelope range, int nsamples) throws IOException {
+	public RecordSet queryRange(Envelope range, int nsamples) {
 		return new GRecordSet(m_ds.queryRange(range, nsamples));
 	}
 
@@ -131,11 +122,6 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	public long append(RecordSet rset, Plan plan) {
 		return m_ds.append(rset, plan);
 	}
-
-//	@Override
-//	public void appendPlanResult(Plan plan, ExecutePlanOptions execOpts) {
-//		m_ds.appendPlanResult(plan, execOpts);
-//	}
 
 	@Override
 	public SpatialIndexInfo cluster(ClusterDataSetOptions opts) {
@@ -153,17 +139,6 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public boolean hasThumbnail() {
-		return m_ds.hasThumbnail();
-	}
-
-	@Override
-	public RecordSet readThumbnail(Envelope bounds, int count)
-			throws ThumbnailNotFoundException, InsufficientThumbnailException, IOException {
-		return new GRecordSet(m_ds.readThumbnail(bounds, count));
-	}
-
-	@Override
 	public void createThumbnail(int sampleCount) throws IndexNotFoundException {
 		m_ds.createThumbnail(sampleCount);
 	}
@@ -171,11 +146,6 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	@Override
 	public boolean deleteThumbnail() {
 		return m_ds.deleteThumbnail();
-	}
-
-	@Override
-	public float getThumbnailRatio() throws ThumbnailNotFoundException {
-		return m_ds.getThumbnailRatio();
 	}
 	
 	@Override

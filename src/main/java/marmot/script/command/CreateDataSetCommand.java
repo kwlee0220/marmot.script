@@ -3,12 +3,12 @@ package marmot.script.command;
 import java.util.Map;
 
 import groovy.lang.Closure;
-import marmot.DataSet;
-import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.Plan;
 import marmot.RecordSchema;
-import marmot.StoreDataSetOptions;
+import marmot.dataset.DataSet;
+import marmot.dataset.GeometryColumnInfo;
+import marmot.optor.StoreDataSetOptions;
 import marmot.script.GroovyDslClass;
 import marmot.script.ScriptUtils;
 import marmot.script.dslobj.RecordSchemaParser;

@@ -3,9 +3,9 @@ package marmot.script.command;
 import java.io.File;
 
 import groovy.lang.Closure;
-import marmot.GeometryColumnInfo;
 import marmot.MarmotRuntime;
 import marmot.command.ImportParameters;
+import marmot.dataset.GeometryColumnInfo;
 import marmot.externio.csv.ImportCsv;
 import marmot.script.ScriptUtils;
 import marmot.script.dslobj.CsvParametersParser;
