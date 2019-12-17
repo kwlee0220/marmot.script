@@ -47,6 +47,11 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	public DataSetType getType() {
 		return m_ds.getType();
 	}
+	
+	@Override
+	public String getDirName() {
+		return m_ds.getDirName();
+	}
 
 	@Override
 	public boolean hasGeometryColumn() {
