@@ -13,7 +13,9 @@ import marmot.externio.csv.CsvParameters;
  * @author Kang-Woo Lee (ETRI)
  */
 public class CsvParametersParser extends GroovyObjectSupport {
-	protected CsvParameters m_options = CsvParameters.create();
+	protected CsvParameters m_params = CsvParameters.create();
+	private long m_progressInterval = -1;
+	private boolean m_force = false;
 	
 	public static CsvParametersParser from(Map<String,Object> args) {
 		CsvParametersParser parser = new CsvParametersParser();
@@ -31,6 +33,10 @@ public class CsvParametersParser extends GroovyObjectSupport {
 		getStringOption(args, "nullValue").ifPresent(parser::nullValue);
 		
 		return parser;
+	}
+	
+	public CsvParameters getParsed() {
+		return m_params;
 	}
 	
 	@Override
@@ -59,58 +65,76 @@ public class CsvParametersParser extends GroovyObjectSupport {
 		super.setProperty(name, value);
 	}
 	
+	public long progressInterval() {
+		return m_progressInterval;
+	}
+	
+	public CsvParametersParser reportInterval(long intvl) {
+		m_progressInterval = intvl;
+		return this;
+	}
+	
+	public boolean force() {
+		return m_force;
+	}
+	
+	public CsvParametersParser force(boolean flag) {
+		m_force = flag;
+		return this;
+	}
+	
 	public CsvParametersParser delim(String delim) {
-		m_options.delimiter(delim.charAt(0));
+		m_params.delimiter(delim.charAt(0));
 		return this;
 	}
 	
 	public CsvParametersParser quote(String quote) {
-		m_options.quote(quote.charAt(0));
+		m_params.quote(quote.charAt(0));
 		return this;
 	}
 	
 	public CsvParametersParser escape(String escape) {
-		m_options.escape(escape.charAt(0));
+		m_params.escape(escape.charAt(0));
 		return this;
 	}
 	
 	public CsvParametersParser commentMarker(String marker) {
-		m_options.commentMarker(marker);
+		m_params.commentMarker(marker);
 		return this;
 	}
 	
 	public CsvParametersParser charset(String charset) {
-		m_options.charset(charset);
+		m_params.charset(charset);
 		return this;
 	}
 	
 	public CsvParametersParser headerFirst(boolean flag) {
-		m_options.headerFirst(flag);
+		m_params.headerFirst(flag);
 		return this;
 	}
 	
 	public CsvParametersParser header(String header) {
-		m_options.header(header);
+		m_params.header(header);
 		return this;
 	}
 	
 	public CsvParametersParser pointColumns(String pointCols) {
-		m_options.pointColumns(pointCols);
+		m_params.pointColumns(pointCols);
 		return this;
 	}
 	
 	public CsvParametersParser srid(String srid) {
-		m_options.srid(srid);
+		m_params.srid(srid);
 		return this;
 	}
 	
 	public CsvParametersParser trimColumns(boolean flag) {
-		m_options.trimColumns(flag);
+		m_params.trimColumns(flag);
 		return this;
 	}
 	
 	public CsvParametersParser nullValue(String str) {
-		m_options.nullValue(str);
+		m_params.nullValue(str);
 		return this;
 	}
 }
