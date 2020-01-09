@@ -12,7 +12,7 @@ import marmot.externio.shp.ShapefileParameters;
  * @author Kang-Woo Lee (ETRI)
  */
 public class ShapefileParametersParser extends GroovyObjectSupport {
-	protected ShapefileParameters m_options = ShapefileParameters.create();
+	protected ShapefileParameters m_params = ShapefileParameters.create();
 	
 	public static ShapefileParametersParser from(Map<String,Object> args) {
 		ShapefileParametersParser parser = new ShapefileParametersParser();
@@ -24,12 +24,12 @@ public class ShapefileParametersParser extends GroovyObjectSupport {
 	}
 	
 	public ShapefileParametersParser charset(String charset) {
-		m_options.charset(charset);
+		m_params.charset(charset);
 		return this;
 	}
 	
 	public ShapefileParametersParser srid(String srid) {
-		m_options.srid(srid);
+		m_params.srid(srid);
 		return this;
 	}
 }

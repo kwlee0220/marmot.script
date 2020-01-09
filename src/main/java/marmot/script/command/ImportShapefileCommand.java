@@ -19,7 +19,6 @@ public class ImportShapefileCommand extends ShapefileParametersParser
 									implements ScriptCommand<Long> {
 	private final MarmotRuntime m_marmot;
 	private final String m_shpPath;
-	private ShapefileParameters m_params = ShapefileParameters.create();
 	private ImportParameters m_importParams = new ImportParameters();
 	
 	public ImportShapefileCommand(MarmotRuntime marmot, String shpPath, String dsId,
