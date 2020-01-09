@@ -67,13 +67,13 @@ public class ImportCsvFileCommand extends CsvParametersParser implements ScriptC
 
 	@Override
 	public Long execute() {
-		return ImportCsv.from(new File(m_csvPath), m_options, m_importParams, m_glob)
+		return ImportCsv.from(new File(m_csvPath), m_params, m_importParams, m_glob)
 						.run(m_marmot);
 	}
 	
 	@Override
 	public String toString() {
 		return String.format("importCsvFile('%s','%s',delim='%s')",
-							m_csvPath, m_importParams.getDataSetId(), m_options.delimiter());
+							m_csvPath, m_importParams.getDataSetId(), m_params.delimiter());
 	}
 }

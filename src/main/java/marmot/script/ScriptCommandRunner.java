@@ -17,8 +17,8 @@ import marmot.script.command.ClusterDataSetCommand;
 import marmot.script.command.CommandReport;
 import marmot.script.command.CreateDataSetCommand;
 import marmot.script.command.DeleteDataSetCommand;
-import marmot.script.command.ExportDataSetAsCsvCommand;
-import marmot.script.command.ExportDataSetAsShapefileCommand;
+import marmot.script.command.ExportToCsvFileCommand;
+import marmot.script.command.ExportToShapefileCommand;
 import marmot.script.command.ImportCsvFileCommand;
 import marmot.script.command.ImportExcelFileCommand;
 import marmot.script.command.ImportShapefileCommand;
@@ -136,24 +136,20 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		return execute(new ImportShapefileCommand(marmot, shpPath, dsId, optDecl));
 	}
 	
-	public long exportDataSetToShapefile(Map<String,Object> args, String dsId,
-										String shpPath, Closure<?> optDecl)
-		throws Exception {
-		ExportDataSetAsShapefileCommand cmd
-								= new ExportDataSetAsShapefileCommand(getMarmotRuntime(), dsId, shpPath,
-																		args, optDecl);
+	public long exportToShapefile(Map<String,Object> args, String dsId, String shpPath,
+									Closure<?> optDecl) throws Exception {
+		MarmotRuntime marmot = getMarmotRuntime();
+		ExportToShapefileCommand cmd
+				= new ExportToShapefileCommand(marmot, dsId, shpPath, args, optDecl);
 		return execute(cmd);
 	}
-	public long exportDataSetToShapefile(Map<String,Object> args, String dsId,
-										String shpPath) throws Exception {
-		return exportDataSetToShapefile(args, dsId, shpPath, null);
-	}
-	public long exportDataSetToShapefile(String dsId, String shpPath, Closure<?> optDecl)
+	public long exportToShapefile(Map<String,Object> args, String dsId, String shpPath)
 		throws Exception {
-		ExportDataSetAsShapefileCommand cmd
-						= new ExportDataSetAsShapefileCommand(getMarmotRuntime(), dsId, shpPath,
-																EMPTY_ARGS, optDecl);
-		return execute(cmd);
+		return exportToShapefile(args, dsId, shpPath, null);
+	}
+	public long exportToShapefile(String dsId, String shpPath, Closure<?> optDecl)
+		throws Exception {
+		return exportToShapefile(EMPTY_ARGS, dsId, shpPath, optDecl);
 	}
 
 	public long importCsvFile(String csvPath, String dsId, Closure<?> optDecl) throws Exception {
@@ -164,24 +160,19 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 		return importCsvFile(csvPath, dsId, null);
 	}
 	
-	public long exportDataSetAsCsv(Map<String,Object> args, String dsId,
-									String csvPath, Closure<?> optDecl)
-		throws Exception {
-		ExportDataSetAsCsvCommand cmd
-							= new ExportDataSetAsCsvCommand(getMarmotRuntime(), dsId, csvPath,
-															args, optDecl);
+	public long exportToCsvFile(Map<String,Object> args, String dsId, String csvPath,
+								Closure<?> optDecl) throws Exception {
+		MarmotRuntime marmot = getMarmotRuntime();
+		ExportToCsvFileCommand cmd
+							= new ExportToCsvFileCommand(marmot, dsId, csvPath, args, optDecl);
 		return execute(cmd);
 	}
-	public long exportDataSetAsCsv(Map<String,Object> args, String dsId,
-										String csvPath) throws Exception {
-		return exportDataSetToShapefile(args, dsId, csvPath, null);
+	public long exportToCsvFile(Map<String,Object> args, String dsId, String csvPath) throws Exception {
+		return exportToCsvFile(args, dsId, csvPath, null);
 	}
-	public long exportDataSetAsCsv(String dsId, String csvPath, Closure<?> optDecl)
+	public long exportToCsvFile(String dsId, String csvPath, Closure<?> optDecl)
 		throws Exception {
-		ExportDataSetAsCsvCommand cmd
-						= new ExportDataSetAsCsvCommand(getMarmotRuntime(), dsId, csvPath,
-														EMPTY_ARGS, optDecl);
-		return execute(cmd);
+		return exportToCsvFile(EMPTY_ARGS, dsId, csvPath, optDecl);
 	}
 	
 	public long importExcelFile(Map<String,Object> args, String excelPath, String dsId,
