@@ -1,0 +1,8 @@
+createDataSet('tmp/result') {
+	geometry 'the_geom(EPSG:5186)'
+	force = true
+	from plan('create_plan') {
+		load '교통/지하철/서울역사'
+		filter 'trnsit_yn==1'
+	}
+}

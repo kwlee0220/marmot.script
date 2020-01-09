@@ -1,0 +1,8 @@
+importCsvFile('/mnt/data/sbdata/data/공공데이터포털/주유소_가격', 'POI/주유소_가격') {
+	delim 		'|'
+	headerFirst true
+	srid		'EPSG:4326'
+	pointColumns '경도|위도'
+	geometry 	'the_geom(EPSG:5186)'
+	force 		true
+}

@@ -1,0 +1,6 @@
+exportToCsvFile('POI/주유소_가격', '/home/kwlee/tmp/xxx.csv') {
+	delim ','
+	pointColumns 'x,y'
+	srid 'EPSG:4326'
+	force true
+}

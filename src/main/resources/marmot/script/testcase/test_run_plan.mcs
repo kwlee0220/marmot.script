@@ -1,0 +1,6 @@
+run plan('test_filter') {
+	load '교통/지하철/서울역사'
+	filter 'KOR_SUB_NM.length() > 7 && KOR_SUB_NM.indexOf("(") < 0'
+	project 'SUB_STA_SN,KOR_SUB_NM'
+	store 'tmp/result', force: true
+}

@@ -1,0 +1,5 @@
+
+exportToShapefile('교통/지하철/서울역사', '/home/kwlee/tmp/xxx') {
+	charset 'euc-kr'
+	force true
+}

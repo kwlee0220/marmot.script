@@ -1,0 +1,5 @@
+importShapefile('/mnt/data/sbdata/data/포스웨이브/서울지하철역사', '교통/지하철/서울역사') {
+	geometry 'the_geom(EPSG:5186)'
+	charset 'euc-kr'
+	force true
+}
