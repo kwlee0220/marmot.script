@@ -15,7 +15,7 @@ import marmot.script.ScriptUtils;
  * 
  * @author Kang-Woo Lee (ETRI)
  */
-public class ExportDataSetAsShapefileCommand extends ScriptParsingObject
+public class ExportToShapefileCommand extends ScriptParsingObject
 											implements ScriptCommand<Long> {
 	private final String m_dsId;
 	private final String m_shpPath;
@@ -23,7 +23,7 @@ public class ExportDataSetAsShapefileCommand extends ScriptParsingObject
 	private long m_progressInterval = -1;
 	private boolean m_force = false;
 	
-	public ExportDataSetAsShapefileCommand(MarmotRuntime marmot, String dsId, String shpPath,
+	public ExportToShapefileCommand(MarmotRuntime marmot, String dsId, String shpPath,
 									Map<String,Object> args, Closure<?> optDecl) {
 		super(marmot);
 		
@@ -43,33 +43,33 @@ public class ExportDataSetAsShapefileCommand extends ScriptParsingObject
 		}
 	}
 	
-	public ExportDataSetAsShapefileCommand charset(String charsetName) {
+	public ExportToShapefileCommand charset(String charsetName) {
 		m_params.charset(charsetName);
 		return this;
 	}
 	
-	public ExportDataSetAsShapefileCommand typeName(String name) {
+	public ExportToShapefileCommand typeName(String name) {
 		m_params.typeName(name);
 		return this;
 	}
 	
-	public ExportDataSetAsShapefileCommand shpSrid(String srid) {
+	public ExportToShapefileCommand shpSrid(String srid) {
 		m_params.shpSrid(srid);
 		return this;
 	}
 	
-	public ExportDataSetAsShapefileCommand splitSize(Object szExpr) {
+	public ExportToShapefileCommand splitSize(Object szExpr) {
 		long sz = ScriptUtils.parseByteLength(szExpr);
 		m_params.splitSize(sz);
 		return this;
 	}
 	
-	public ExportDataSetAsShapefileCommand reportInterval(long intvl) {
+	public ExportToShapefileCommand reportInterval(long intvl) {
 		m_progressInterval = intvl;
 		return this;
 	}
 	
-	public ExportDataSetAsShapefileCommand force(boolean flag) {
+	public ExportToShapefileCommand force(boolean flag) {
 		m_force = flag;
 		return this;
 	}
