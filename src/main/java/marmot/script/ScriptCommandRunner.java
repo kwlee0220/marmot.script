@@ -46,14 +46,18 @@ public abstract class ScriptCommandRunner extends DslScriptBase {
 	
 	private Boolean m_verbose;
 	
-	public DataSet createDataSet(Map<String,Object> args, String dsId) throws Exception {
-		CreateDataSetCommand cmd = new CreateDataSetCommand(getMarmotRuntime(), dsId, args);
+	public DataSet createDataSet(Map<String,Object> args, String dsId, Closure<?> optDecl)
+		throws Exception {
+		MarmotRuntime marmot = getMarmotRuntime();
+		
+		CreateDataSetCommand cmd = new CreateDataSetCommand(marmot, dsId, args, optDecl);
 		return execute(cmd);
 	}
+	public DataSet createDataSet(Map<String,Object> args, String dsId) throws Exception {
+		return createDataSet(args, dsId, null);
+	}
 	public DataSet createDataSet(String dsId, Closure<?> optDecl) throws Exception {
-		CreateDataSetCommand cmd = new CreateDataSetCommand(getMarmotRuntime(), dsId, EMPTY_ARGS);
-		ScriptUtils.callClosure(optDecl, cmd);
-		return execute(cmd);
+		return createDataSet(EMPTY_ARGS, dsId, optDecl);
 	}
 	
 	public Void delete(GDataSet ds) throws Exception {

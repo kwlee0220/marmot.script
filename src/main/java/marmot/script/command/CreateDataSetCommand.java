@@ -25,7 +25,8 @@ public class CreateDataSetCommand extends GroovyDslClass
 	private RecordSchema m_schema;
 	private Plan m_plan;
 	
-	public CreateDataSetCommand(MarmotRuntime marmot, String dsId, Map<String,Object> args) {
+	public CreateDataSetCommand(MarmotRuntime marmot, String dsId, Map<String,Object> args,
+								Closure<?> optDecl) {
 		m_marmot = marmot;
 		m_dsId = dsId;
 		
@@ -36,6 +37,10 @@ public class CreateDataSetCommand extends GroovyDslClass
 					.cast(RecordSchema.class)
 					.ifPresent(s -> m_schema = s);
 		m_options = ScriptUtils.parseStoreDataSetOptions(args);
+		
+		if ( optDecl != null ) {
+			ScriptUtils.callClosure(optDecl, this);
+		}
 	}
 	
 	@Override
