@@ -1,5 +1,4 @@
-
-exportToShapefile('교통/지하철/서울역사', '/home/kwlee/tmp/xxx') {
+exportToShapefile('교통/지하철/서울역사', '/tmp/test/exported') {
 	charset 'euc-kr'
 	force true
 }

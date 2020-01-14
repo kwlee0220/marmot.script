@@ -1,1 +1,1 @@
-moveDataSet 'tmp/result', 'tmp/result2'
+moveDataSet '교통/지하철/서울역사', 'tmp/result'

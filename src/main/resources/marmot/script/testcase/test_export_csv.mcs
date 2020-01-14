@@ -1,4 +1,4 @@
-exportToCsvFile('POI/주유소_가격', '/home/kwlee/tmp/xxx.csv') {
+exportToCsvFile('POI/주유소_가격', '/tmp/test/exported.csv') {
 	delim ','
 	pointColumns 'x,y'
 	srid 'EPSG:4326'
