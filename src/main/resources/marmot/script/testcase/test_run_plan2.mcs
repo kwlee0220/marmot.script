@@ -1,0 +1,8 @@
+run plan("test_plan") {
+    load "나비콜/택시로그"
+    filter "status == 1 || status == 2"
+    spatialJoin "the_geom", "POI/서울_종합병원", output:"param.{the_geom, bplc_nm}", joinExpr: withinDistance('1km')
+    aggregateByGroup("bplc_nm", tags: "the_geom") { count = COUNT() }
+    sort "count:d"
+    store 'tmp/result', geometry: 'the_geom(EPSG:5186)', force: true
+}
