@@ -12,6 +12,7 @@ import marmot.RecordScript;
 import marmot.optor.CsvOptions;
 import marmot.optor.ParseCsvOptions;
 import marmot.optor.StoreDataSetOptions;
+import marmot.optor.geo.SpatialRelation;
 import marmot.plan.GeomOpOptions;
 import marmot.plan.Group;
 import marmot.plan.JdbcConnectOptions;
@@ -180,7 +181,18 @@ public class ScriptUtils {
 	public static SpatialJoinOptions parseSpatialJoinOptions(Map<String,Object> args) {
 		SpatialJoinOptions opts = SpatialJoinOptions.EMPTY;
 		
-		opts = getStringOption(args, "joinExpr").transform(opts, SpatialJoinOptions::joinExpr);
+		opts = getOption(args, "joinExpr")
+				.transform(opts, (o,expr) -> {
+					if ( expr instanceof SpatialRelation ) {
+						return o.joinExpr((SpatialRelation)expr);
+					}
+					else if ( expr instanceof String ) {
+						return o.joinExpr((String)expr);
+					}
+					else {
+						throw new IllegalArgumentException("unexpected join expression: " + expr);
+					}
+				});
 		opts = getBooleanOption(args, "negated").transform(opts, SpatialJoinOptions::negated);
 		opts = getStringOption(args, "output").transform(opts, SpatialJoinOptions::outputColumns);
 		
