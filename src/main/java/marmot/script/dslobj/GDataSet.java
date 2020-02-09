@@ -152,6 +152,11 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	public boolean deleteThumbnail() {
 		return m_ds.deleteThumbnail();
 	}
+
+	@Override
+	public FOption<Float> getThumbnailRatio() {
+		return m_ds.getThumbnailRatio();
+	}
 	
 	@Override
 	public String toString() {
