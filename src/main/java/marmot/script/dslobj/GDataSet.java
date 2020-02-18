@@ -12,7 +12,7 @@ import marmot.dataset.DataSetType;
 import marmot.dataset.GeometryColumnInfo;
 import marmot.geo.catalog.IndexNotFoundException;
 import marmot.geo.catalog.SpatialIndexInfo;
-import marmot.geo.command.ClusterDataSetOptions;
+import marmot.geo.command.CreateSpatialIndexOptions;
 import marmot.geo.query.RangeQueryEstimate;
 import utils.func.FOption;
 import utils.func.Lazy;
@@ -129,7 +129,7 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public SpatialIndexInfo cluster(ClusterDataSetOptions opts) {
+	public SpatialIndexInfo cluster(CreateSpatialIndexOptions opts) {
 		return m_ds.cluster(opts);
 	}
 
