@@ -15,10 +15,10 @@ import marmot.script.ScriptUtils;
  * @author Kang-Woo Lee (ETRI)
  */
 public class StoreDataSetOptionsParser extends GroovyObjectSupport {
-	protected StoreDataSetOptions m_options = StoreDataSetOptions.EMPTY;
+	protected StoreDataSetOptions m_options = StoreDataSetOptions.DEFAULT;
 	
 	public static StoreDataSetOptions parse(Map<String,Object> args) {
-		StoreDataSetOptions opts = StoreDataSetOptions.EMPTY;
+		StoreDataSetOptions opts = StoreDataSetOptions.DEFAULT;
 		
 		opts = getBooleanOption(args, "force").transform(opts, StoreDataSetOptions::force);
 		opts = getOption(args, "geometry")
