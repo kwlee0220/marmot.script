@@ -517,14 +517,11 @@ public abstract class PlanDslHandler extends DslScriptBase {
 		
 		PredicateOptions opts = ScriptUtils.parsePredicateOptions(args);
 		
-		if ( key instanceof Geometry ) {
-			m_builder.query(dsId, (Geometry)key, opts);
+		if ( key instanceof Envelope ) {
+			m_builder.query(dsId, (Envelope)key, opts);
 		}
 		else if ( key instanceof GDataSet ) {
 			m_builder.query(dsId, ((GDataSet)key).getId(), opts);
-		}
-		else if ( key instanceof Envelope ) {
-			m_builder.query(dsId, (Envelope)key, opts);
 		}
 		else {
 			throw new IllegalArgumentException("invalid key object: " + key);
