@@ -23,7 +23,7 @@ public class ClusterDataSetCommand extends GroovyDslClass
 	@Override
 	public ClusterReport execute() {
 		DataSet ds = m_marmot.getDataSet(m_dsId);
-		SpatialIndexInfo idxInfo = ds.cluster();
+		SpatialIndexInfo idxInfo = ds.createSpatialIndex();
 		
 		return new ClusterReport(this, idxInfo);
 	}

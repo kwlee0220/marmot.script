@@ -89,8 +89,8 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public FOption<SpatialIndexInfo> getDefaultSpatialIndexInfo() {
-		return m_ds.getDefaultSpatialIndexInfo();
+	public FOption<SpatialIndexInfo> getSpatialIndexInfo() {
+		return m_ds.getSpatialIndexInfo();
 	}
 
 	@Override
@@ -129,13 +129,13 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public SpatialIndexInfo cluster(CreateSpatialIndexOptions opts) {
-		return m_ds.cluster(opts);
+	public SpatialIndexInfo createSpatialIndex(CreateSpatialIndexOptions opts) {
+		return m_ds.createSpatialIndex(opts);
 	}
 
 	@Override
-	public void deleteSpatialCluster() {
-		m_ds.deleteSpatialCluster();
+	public void deleteSpatialIndex() {
+		m_ds.deleteSpatialIndex();
 	}
 
 	@Override
