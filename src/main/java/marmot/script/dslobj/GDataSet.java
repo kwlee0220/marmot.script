@@ -124,6 +124,11 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
+	public long append(RecordSet rset, String partId) {
+		return m_ds.append(rset, partId);
+	}
+
+	@Override
 	public long append(RecordSet rset, Plan plan) {
 		return m_ds.append(rset, plan);
 	}
