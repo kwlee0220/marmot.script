@@ -129,11 +129,6 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	}
 
 	@Override
-	public long append(RecordSet rset, Plan plan) {
-		return m_ds.append(rset, plan);
-	}
-
-	@Override
 	public SpatialIndexInfo createSpatialIndex(CreateSpatialIndexOptions opts) {
 		return m_ds.createSpatialIndex(opts);
 	}
