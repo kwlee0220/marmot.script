@@ -1,10 +1,11 @@
 package marmot.script.dslobj;
 
+import java.util.Set;
+
 import com.vividsolutions.jts.geom.Envelope;
 
 import groovy.lang.GroovyObjectSupport;
 import marmot.MarmotRuntime;
-import marmot.Plan;
 import marmot.RecordSchema;
 import marmot.RecordSet;
 import marmot.dataset.DataSet;
@@ -12,7 +13,9 @@ import marmot.dataset.DataSetType;
 import marmot.dataset.GeometryColumnInfo;
 import marmot.geo.catalog.IndexNotFoundException;
 import marmot.geo.catalog.SpatialIndexInfo;
+import marmot.geo.command.ClusterSpatiallyOptions;
 import marmot.geo.command.CreateSpatialIndexOptions;
+import marmot.geo.command.EstimateQuadKeysOptions;
 import marmot.geo.query.RangeQueryEstimate;
 import utils.func.FOption;
 import utils.func.Lazy;
@@ -141,6 +144,16 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	@Override
 	public RecordSet readSpatialCluster(String quadKey) {
 		return new GRecordSet(m_ds.readSpatialCluster(quadKey));
+	}
+
+	@Override
+	public Set<String> estimateQuadKeys(EstimateQuadKeysOptions opts) {
+		return m_ds.estimateQuadKeys(opts);
+	}
+
+	@Override
+	public void clusterSpatially(String outDsId, ClusterSpatiallyOptions opts) {
+		m_ds.clusterSpatially(outDsId, opts);
 	}
 
 	@Override
