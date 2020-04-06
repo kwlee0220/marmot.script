@@ -11,6 +11,7 @@ import marmot.RecordSet;
 import marmot.dataset.DataSet;
 import marmot.dataset.DataSetType;
 import marmot.dataset.GeometryColumnInfo;
+import marmot.dataset.NotSpatiallyClusteredException;
 import marmot.geo.catalog.IndexNotFoundException;
 import marmot.geo.catalog.SpatialIndexInfo;
 import marmot.geo.command.ClusterSpatiallyOptions;
@@ -129,6 +130,11 @@ public class GDataSet extends GroovyObjectSupport implements DataSet {
 	@Override
 	public long append(RecordSet rset, String partId) {
 		return m_ds.append(rset, partId);
+	}
+
+	@Override
+	public Set<String> getClusterQuadKeyAll() throws NotSpatiallyClusteredException {
+		return m_ds.getClusterQuadKeyAll();
 	}
 
 	@Override
