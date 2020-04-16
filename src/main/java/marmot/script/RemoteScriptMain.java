@@ -38,7 +38,7 @@ public class RemoteScriptMain extends MarmotClientCommand {
 	}
 
 	@Command(name="run", description="run mamort script")
-	public static class Run extends SubCommand {
+	public static class Run extends SubCommand<MarmotRuntime> {
 		@Parameters(paramLabel="path", index="0", arity="0..1", description="plan file path to run")
 		private String m_scriptFile;
 		
@@ -61,7 +61,7 @@ public class RemoteScriptMain extends MarmotClientCommand {
 	}
 
 	@Command(name="run", description="run mamort script")
-	public static class Schema extends SubCommand {
+	public static class Schema extends SubCommand<MarmotRuntime> {
 		@Parameters(paramLabel="path", index="0", arity="0..1", description="plan file path to run")
 		private String m_planFile;
 

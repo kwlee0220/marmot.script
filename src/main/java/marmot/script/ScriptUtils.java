@@ -179,7 +179,7 @@ public class ScriptUtils {
 	}
 	
 	public static SpatialJoinOptions parseSpatialJoinOptions(Map<String,Object> args) {
-		SpatialJoinOptions opts = SpatialJoinOptions.EMPTY;
+		SpatialJoinOptions opts = SpatialJoinOptions.DEFAULT;
 		
 		opts = getOption(args, "joinExpr")
 				.transform(opts, (o,expr) -> {
