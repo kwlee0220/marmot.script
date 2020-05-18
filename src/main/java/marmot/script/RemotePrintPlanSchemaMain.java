@@ -7,13 +7,13 @@ import marmot.Plan;
 import marmot.RecordSchema;
 import marmot.command.MarmotClientCommands;
 import marmot.command.MarmotConnector;
-import marmot.command.UsageHelp;
 import marmot.remote.protobuf.PBMarmotClient;
 import marmot.script.plan.PlanScriptParser;
 import picocli.CommandLine;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Parameters;
+import utils.UsageHelp;
 import utils.func.CheckedConsumer;
 
 /**

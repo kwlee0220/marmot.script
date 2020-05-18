@@ -24,12 +24,12 @@ repositories {
 		url "http://www.datanucleus.org/downloads/maven2/"
 	}
 	maven {
-		url "http://download.osgeo.org/webdav/geotools/"
-	}
-	maven {
 		url "http://repo.boundlessgeo.com/main/"
 	}
     mavenCentral()
+	maven {
+		url "http://repo.osgeo.org/repository/release/"
+	}
 }
 
 ext.groovy_version = '2.5.7'

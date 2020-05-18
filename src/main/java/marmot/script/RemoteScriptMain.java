@@ -9,7 +9,6 @@ import marmot.Plan;
 import marmot.RecordSchema;
 import marmot.command.MarmotClientCommand;
 import marmot.command.MarmotClientCommands;
-import marmot.command.PicocliCommands.SubCommand;
 import marmot.script.RemoteScriptMain.Run;
 import marmot.script.plan.PlanScriptParser;
 import picocli.CommandLine;
@@ -17,6 +16,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Help;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import utils.PicocliSubCommand;
 
 /**
  * 
@@ -38,7 +38,7 @@ public class RemoteScriptMain extends MarmotClientCommand {
 	}
 
 	@Command(name="run", description="run mamort script")
-	public static class Run extends SubCommand<MarmotRuntime> {
+	public static class Run extends PicocliSubCommand<MarmotRuntime> {
 		@Parameters(paramLabel="path", index="0", arity="0..1", description="plan file path to run")
 		private String m_scriptFile;
 		
@@ -46,8 +46,8 @@ public class RemoteScriptMain extends MarmotClientCommand {
 		private boolean m_verbose;
 
 		@Override
-		public void run(MarmotRuntime marmot) throws Exception {
-			MarmotScriptEngine scriptEngine = new MarmotScriptEngine(marmot);
+		public void run(MarmotRuntime initialContext) throws Exception {
+			MarmotScriptEngine scriptEngine = new MarmotScriptEngine(initialContext);
 			scriptEngine.setVerbose(m_verbose);
 			
 			if ( m_scriptFile != null ) {
@@ -61,18 +61,18 @@ public class RemoteScriptMain extends MarmotClientCommand {
 	}
 
 	@Command(name="run", description="run mamort script")
-	public static class Schema extends SubCommand<MarmotRuntime> {
+	public static class Schema extends PicocliSubCommand<MarmotRuntime> {
 		@Parameters(paramLabel="path", index="0", arity="0..1", description="plan file path to run")
 		private String m_planFile;
 
 		@Override
-		public void run(MarmotRuntime marmot) throws Exception {
-			PlanScriptParser parser = new PlanScriptParser(marmot);
+		public void run(MarmotRuntime initialContext) throws Exception {
+			PlanScriptParser parser = new PlanScriptParser(initialContext);
 			
 			Plan plan = (m_planFile != null)
 						? parser.parse("sample_plan", new File(m_planFile))
 						: parser.parse("sample_plan", System.in);
-			RecordSchema schema = marmot.getOutputRecordSchema(plan);
+			RecordSchema schema = initialContext.getOutputRecordSchema(plan);
 			
 			System.out.println("SCHEMA:");
 			schema.getColumns()
