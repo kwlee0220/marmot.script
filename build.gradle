@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 
@@ -32,11 +32,22 @@ repositories {
 	}
 }
 
-ext.groovy_version = '2.5.7'
+ext {
+	geotools_version = '26.1'
+	jts_version = '1.17.1'
+	groovy_version = '2.5.7'
+}
 
 dependencies {
 	compile project(':marmot.client')
-	compile "org.codehaus.groovy:groovy:${groovy_version}"
+	
+	// GeoTools & JTS
+//	api	"org.geotools:gt-epsg-hsql:${geotools_version}"
+//	api "org.geotools:gt-shapefile:${geotools_version}"
+//	api "org.geotools:gt-geojson:${geotools_version}"
+	api "org.locationtech.jts:jts-core:${jts_version}"
+	
+	implementation "org.codehaus.groovy:groovy:${groovy_version}"
 }
 
 shadowJar {
@@ -98,6 +109,11 @@ apply plugin: 'eclipse'
 eclipse {
 	classpath {
 		file {
+			withXml {
+				def node = it.asNode()
+				node.appendNode('classpathentry', [kind: 'output', path: 'classes'])
+			}
+			
 			whenMerged { cp ->
 				Map entryByPath = cp.entries.groupBy { entry -> entry.path }
 				entryByPath.each { key, values ->
@@ -114,7 +130,12 @@ eclipse {
 				}
 				cp.entries.each { entry ->
 					if ( entry.kind == 'src' && entry.hasProperty('output') ) {
-						entry.output = 'classes'
+						if ( entry.path.startsWith("src/test/") ) {
+							entry.output = 'test_classes'
+						}
+						else {
+							entry.output = 'classes'
+						}
 					}
 				}
 			}
