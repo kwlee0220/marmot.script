@@ -2,7 +2,7 @@ package marmot.script.dslobj;
 
 import java.util.Set;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 import groovy.lang.GroovyObjectSupport;
 import marmot.MarmotRuntime;

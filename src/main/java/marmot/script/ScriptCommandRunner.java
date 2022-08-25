@@ -3,8 +3,9 @@ package marmot.script;
 import java.util.Collections;
 import java.util.Map;
 
+import org.locationtech.jts.geom.Geometry;
+
 import com.google.common.collect.Maps;
-import com.vividsolutions.jts.geom.Geometry;
 
 import groovy.lang.Closure;
 import marmot.ExecutePlanOptions;
